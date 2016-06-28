@@ -1,0 +1,15 @@
+ finally let's talk about how we specify the set of functional dependencies for a relation
+ first i'll define a notion of one set of functional dependencies following from another one
+ so let's suppose we have a relation r and we have two sets of functional dependencies that aren't identical s and s
+ we see that s follows from s if every relation instance satisfying s also satisfies s
+ as a simple example suppose s is social security number determines priority and suppose s is the two functional dependencies social security number determines gpa and gpa determines priority
+ then it's certainly the case that in an for this example s follows from s
+ every time we have a relation that satisfies social security number determines gpa and gpa determines priority then that relation will also satisfy social security number determines priority and we kind of proved that actually in an earlier part of this video
+ so one question you might have is how do we test whether one set of functional dependencies follows from another
+ that really boils down to testing whether one functional dependency follows from a set
+ so and let me just make this a bar b bar here to make clear they can be sets of attributes
+ because if we have s and s then we just check whether every functional dependency in s follows from the functional dependencies in s
+ there's actually two ways of going about this test
+ one of the ways is to use the closure
+ we'll compute a based on the functional dependencies that are in s and then we'll check if b is in the set
+ reminder computing the closure tells us every attribute that's functionally determined by the attributes in a based on the functional dependencies in s if those include b then a determines b does indeed follow from s

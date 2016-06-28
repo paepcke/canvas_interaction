@@ -1,0 +1,20 @@
+ now just a few more details of referential integrity constraints
+ the referencing attribute in this case the referencing attribute is a is often called the foreign key
+ and in fact referential integrity is often referred to as foreign key constraints
+ and even in the sql syntax we'll see that the term foreign key is used
+ second when we have a referenced attribute in this case now we're talking about attribute b so we have r a to s b the referenced attribute is usually required to be the primary key for the table for it's table or at least specified as unique
+ and that's more about efficient implementation than anything else
+ but it is a requirement in the sql standard and in most systems
+ third it is possible to have foreign keys that consist of multiple attributes just like keys themselves can be multiple attributes
+ let's say for example that in our college relation the college name together with the state form a key not the college name individually
+ if that were the case then our apply table would presumably have one more column that specified the state so we knew which college a student was applying to
+ and in this case we would have these two attributes together as the foreign key referencing the college name and state together in the college table
+ and we'll see an example of multikey multiattribute foreign key constraints in our demo
+ now let's talk about the enforcement of referential integrity constraints
+ first let's think about what operations can occur to the database to violate a constraint
+ it's not every possible modification
+ so again let's suppose we have r a referencing s b
+ so for example here we have apply referencing students and we have apply referencing college
+ so certainly if we insert a tuple into the referencing relation so if we inserted a tuple into the apply relation that could potentially violate the referential integrity if the value say an sid or c name didn't have matching values in the reference relations
+ sort of conversely if we delete from a reference relation say we delete a student then that could cause a violation because say we have the value here and the app apply tuple that was referring to after this is gone would then have effectively a dangling pointer
+ and of course if we updated the referencing value either of these columns that could cause a violation if the new value didn't exist in the reference table or if we update the referenced values that could also cause a violation

@@ -1,0 +1,66 @@
+ in this video we'll be learning about null values in sql
+ as usual we'll be considering a simple college admissions database and we'll be exploring the select from where query expressions
+ now instead of extending what we can write in queries in this video we'll be looking at extending what's in the data
+ specifically in relational databases unless specified otherwise any value in an attribute can take on the special value null
+ null is usually used to mean that the value is undefined or unknown
+ for example we might have a student whose gpa is unknown or who doesn't have a gpa and we would represent that in our data with null
+ or we might create our reply relation with the decisions not yet decided and those decision values would also be null
+ so what we're going to look at in our demo queries is what happens when we have null values and we run queries over the database
+ here is the set of students in our database
+ in order to explore what happens when we have null values let's insert two new students kevin and laurie each of which have a null gpa
+ we go back and we look at our student table and now we see kevin and laurie as part of that table and in this particular interface null values are depicted as blanks
+ now let's run some queries
+ our first query finds students whose gpa is greater than
+ it's a simple query to write
+ we run the query and we find a number of students in our result
+ we don't have kevin and laurie because their gpas are null so we can't determine that they're greater than
+ let's run another query that says gpa less than or equal to
+ we'll get a different set of students as we see but we still don't get kevin and laurie
+ now let's run a query where we ask for the gpa to be greater than or less than or equal to
+ and this is the one that's a little bit funny
+ actually we talked about this very same query back when we were talking about the relational model
+ when you look at the query you would think that you would get every student in the database because everybody's gpa obviously is either greater than or less or equal to
+ or from a more logical point of view this is an expression that's always true
+ but you might not be surprised when we run the query we still don't get kevin or laurie because we can't determine that their gpa satisfies either of these conditions
+ so even when we have a query that looks like the where clause is a tautology meaning a logical expression that's always true we still don't get all the data in the result
+ if we want this query to return all students in the database we can do that by adding one more clause to the where which is or gpa is null
+ now this is truly a condition that will be matched by every tuple because either the gpa is greater than less than or equal or it's a null value
+ is null is a keyword phrase in sql that matches values that are null
+ now when we run the query we finally get all of the students in the database including kevin and laurie
+ just to drive the point home a bit further let's continue looking at queries where we have null values involved in where clauses
+ in this query we're looking for students where their gpa is greater than or their size high school is less than
+ so let's run the query and see who we get
+ we get all of these students including kevin
+ so although his gpa is null and therefore we can't determine that it satisfies this part of the condition because since his high school size is he does satisfy the second part of the condition and he does come out in our result
+ now let's add one more condition which is or size high school is greater than or equal to
+ so now we have again something in the condition that looks like a tautology
+ it looks like it should always be true
+ everyone's high school is either smaller or larger than
+ furthermore in this case we have no null values for the high school size so when we run this query we should get back everybody and indeed when we run the query we do get back all of the students
+ now i'm not going to go into details here because you can certainly read about it
+ the way the where clause is evaluated when null values are involved is using a three valued logic where every expression is either true or false or unknown
+ these logical values are combined to finally yield a value for the where expression that determines whether a couple is in the result
+ our last series of queries explores the interaction between null values and aggregate functions specifically in this case the count function
+ there are actually quite a few subtleties about null values and aggregation and also null values and sub queries
+ we're not going to do an exhaustive exploration of these subtleties here but just give one example
+ and we encourage you if you are using a database with null values to be very careful when you write your queries to make sure you understand how the null values are going to influence the result
+ ok so our query here is counting the number of students whose gpa is not null for starters
+ so we run the query and we see that there twelve students who have a non null gpa
+ those are the students we had originally in the database before we added kevin and lorrie with their null gpa's
+ now instead of just counting the students let's count the distinct gpas
+ so among these twelve students how many different gpas are represented
+ it turns out there are seven distinct gpas among those that are not null
+ let's further drop the not null condition and just count the the distinct gpas among the students
+ that will tell us whether count distinct includes nulls or not in its count
+ we'll run the query and we get the same answer so we still have gpas and we are not counting the null values
+ now let's do one last query which is to take away the and just look at the distinct gpas themselves
+ so we had seven when we did the count
+ we run the query now and we get eight
+ what happened
+ well this first tuple is hard with the visualization
+ this first answer is empty and that's actually the null value
+ so when we right select the distinct gpa
+ we do include the null value in our result if there is a null gpa
+ however when we count the distinct values we don't include the null
+ and that's really just one example of the type of subtleties and possibly unexpected behavior we might get when we have null values
+ so again i encourage you to be very careful when writing queries over databases that include nulls that you know exactly what you're going to get in your result

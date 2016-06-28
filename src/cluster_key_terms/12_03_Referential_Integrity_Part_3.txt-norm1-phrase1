@@ -1,0 +1,128 @@
+ in the sql standard and in all implementations if we have an insertion into the referencing table or an update to the referencing table that causes a violation to the integrity constraint the referential integrity constraint then an error is generated and that modification is not allowed just like the violation of other types of constraints
+ for the reference table however table s in our case table student and table college
+ if there are modifications that violate the constraint if the referential integrity was defined initially with some special options then it's possible for the database system to automatically modify the referencing table so that the constraint is not violated
+ so let's talk about that in a little more detail
+ let's start by talking about deletions from the referenced table
+ so let's says we have our student here maybe has applied a couple of places and then we have our student here in the student table
+ so right now referential integrity is good
+ everything's okay
+ but let's suppose that we delete the tuple with
+ so there's actually three possible things that can happen depending on how we set up the referential integrity constraint in the first place
+ so the default behavior is what's called restrict so restrict is actually a key word but that's the default and it says that if we do a deletion to the reference table and a constraint becomes violated then we generate a air just like i said before and the modification is disallowed
+ the two other options are a little bit more interesting
+ one of them is called set null
+ and what set null says is if we delete a tuple in a reference table then we don't generate an error
+ rather we take the referencing tuples in this case these two tuples with and we take their sids and we replace those sids with null
+ and this is considered acceptable from a referential integrity point of view to have nulls in the foreign key column so that will occur automatically
+ the third possibility is what's called cascade so let's set up a little more data let's say we have who's applied to stanford and we have stanford over here and now let's say that we again delete this tuple so that would leave us with a referential integrity constraint violation here with the stanford value
+ so what cascade says for the on delete case is that if we delete this tuple then we'll simply delete any tuple that has a referencing value so this tuple will be deleted as well
+ now the reason is called cascade is because sometimes you can actually set up a whole chain of referential integrity constraints so we have apply referencing college here but maybe we've had some other referencing ply and maybe even another table referencing that one and if we say deleted a tuple from college that caused us to delete a tuple from a ply if there was a tuple up here referencing that we might get a delete there and then a further delete and then so on
+ typically cascading will only go one step but we'll see an example in our demo where we'll set it up where a cascade will go some distance
+ now updates have a similar three options
+ let's erase all this stuff here
+ let's again set up some example data
+ so let's say our student was applied to stanford and we have over here
+ if we tried to update say this to be the value there strict command would say that's not allowed because that would leave us with a steg when pointer and will generate an error
+ the set null command will similar to the delete if this is changed to four five six set any values to null
+ so in this case we change to in the student
+ and then we would change over here to null
+ probably the most interesting case is the cascade case for the update
+ cascade says that if we update a reference value then we'll make the same update to the referencing value
+ so let's say we have stanford over here in fact we have to if we have the value the referential integrity constraint being correct and now let's say that somebody comes along and says i think stanford is spelled wrong
+ it's actually stanford well that's actually a common mispelling for stanford
+ the first one was correct
+ but if someone makes this change if we have the cascade option for the referential integrity constraints between apply c name and college c name then that update will be propagated to any referencing values
+ so in that case automatically this stanford and any other stanfords in the apply table will be updated automatically to stanford
+ now let's take a look at referential integrity in action
+ let's create our three tables
+ we create the college table with the college name as primary key and the student table with the student id as primary key
+ that allows us to have referential integrity constraints in the apply table that reference those two attributes
+ when we create the table apply now we're going to specify the attributes and thhe key word references says that we're setting up a referential integrity constraint from attribute student id to the student id attribute of the student table
+ and similarly we extend the declaration of the college name attribute to have a referential integrity constraint to the college name attribute of the college table
+ we'll go ahead and create those tables
+ now let's try to populate our tables
+ if we make a mistake we try to put our apply values in first but there's no data in the student table or the college table
+ so when we try to insert for example student applying to stanford we'll get a referential integrity violation because there's no student and there's no college standford and similarly for student applying to berkeley
+ so we see the errors and what we need to do is first insert the tuples for the students and the colleges and then insert the applied tuples afterwards
+ so let's insert the two students and two three four and the two colleges stanford and berkeley no problem doing that
+ and now we'll go ahead and again insert the apply tuples and this time everything should work just fine and it does
+ in addition to inserts into the referencing table we also have to worry about updates
+ so as a reminder let's take a look at the students that we have
+ we have students and and in the apply we have students and each applying to one college
+ now we're going to update our applied tuple that has student id
+ our first update tries to set the student id to but we'll get a referential integrity violation because there's no student with id
+ our second update will be more successful
+ it will update 's application to have student id
+ we'll go ahead and execute the update
+ and we see that the second one did succeed
+ so far we've looked at modifications to the referencing table but we also have to worry about modifications for the referenced tables
+ in our case that's the student table and the college table
+ for example let's suppose we try to delete from the college table where the college name is stanford
+ if we try to delete that couple we'll get an error because we do have an applied couple that has a value stamford and is therefore referencing the couple we're trying to delete
+ similarly tried to delete some student couples
+ let's go back and look at our apply relation and we now see that both of the student ids in apply are so it should be ok to delete the student couple with nothing is referencing it
+ but it should not be okay to delete the couple with student id and indeed when we run the command we see that the first one generated an error and the second one succeeded
+ how about updating a referenced table
+ let's say that we decide we'd rather have berkeley called bezerkly so we try to update that college name but when we run the command we get an error because we do have an apply tuple that's referencing the value as berkeley
+ and finally although we've been talking about data level modifications referential integrity constraints also place restrictions on dropping tables
+ for example if we try tried to drop the student table we would again get a referential integrity constraint because that would leave data in the apply table referencing non existent data in what would now be a non existing table
+ you can see that the errors says that you cannot drop a table student because other objects are currently depending on it
+ so when we have referential integrity constraints if we wanted to drop the tables we'd have to first drop the applied table and then drop the table that it's referencing
+ now we're going to set up the apply table to experiment with some of the automatic mechanisms for handling referential integrity violations
+ specifically we still have the same referential integrity constraints from student id to the student table and from college names to the college table but for the student id referential integrity constraint we're and we're going to specify that if a student is deleted then we're going to set any referencing values to null and we do that with the keywords on delete which tells us what to do when there's a delete to the referenced table we use the set null option
+ for the college name reference we're going to specify that if the college is updated in the college table and that says on update we'll use the cascade option
+ as a reminder what that does is that if we change the college name then we'll propagate that change to any college names that reference it in the apply table
+ now i could have specified two more options
+ i could have specified an on update option for the student id and an on delete option for the college name so there could be four all together
+ because i left those out those both will use the default which is the restrict option which says if you perform a modification that generates a referential integrity violation then an error will be generated and the modification will not be performed just as we saw in the previous examples
+ so let's go ahead and let's create the table and then let's experiment with some modifications
+ let's start by adding a couple more students to our student table
+ so then if we take a look our applied table is currently empty because we just created it our college table has stanford and berkely and our student table now has three tuples student ids and
+ we'll insert five tuples into the apply table and all of them are going to be valid with respect to referential integrity
+ we're only going to insert students that are or and they're only going to apply to stanford or berkeley
+ so we've inserted those values and now we'll perform some modifications to see what happens
+ we're going to delete from the student table all students whose id is greater than
+ going back and looking at that table we'll see that student and are going to be deleted
+ now remember we specified on delete set null for the apply referential integrity constraints
+ specifically when we look at our apply table the references to the students that are about to be deleted should be automatically set to null when we run the delete command
+ so we'll go ahead
+ we'll perform the deletion
+ we'll take a look at the apply table when we we see that those values have indeed been set to null and if we take a look at the student table we'll see that we only have student left
+ now let's test our cascaded update
+ as a reminder when we set up the college name referential integrity constraint we said that if we update the college name in the college table we should propogate those updates using cascade to any references in the applied table
+ so we're once again going to attempt to change the name of berkely to bezerkly
+ this time it should allow us to do it and it should change any applications to berkely to now specify berzerkly
+ so we'll go ahead and run the command and we'll look at the apply and we will see once we refresh that indeed berkeley has now been changed to bezerkly
+ this example is a doozy
+ it's going to show a whole bunch of features that we haven't seen in previous examples
+ we're gonna use a simple table t with just three attributes a b and c and we're going to say that a and b together are a primary key for the table
+ in the example we're going to demonstrate referential integrity within a single table so intra table referential integrity
+ we're going to demonstrate referential integrity involving multiple we'll attribute foreign keys and primary keys and we're going to demonstrate a real cascading where we're going to have a cascaded delete that's going to propagate across numerous couples
+ so typically one thinks of referential integrity as having a referencing table and then the referenced value exists in a different table but there's nothing wrong with having referential integrity within a single table
+ for example in the one attribute case i might have attribute b where every value in b must also appear in value a and that would be a referential integrity constraint within the table
+ in this case things are slightly more complicated because i'm using pairs of attributes for my referential integrity constraint
+ specifically i'm going to have attributes b and c together reference attributes a and b together
+ syntactically to declare a multi attribute referential integrity constraint in a table definition i have to put it at the end because i can't attach it to a single attribute
+ just like i do when i have say multi attribute keys which are also demonstrated here
+ the syntax is at the end of the table definition
+ i'd say that i'm going to have foreign key constraint and attributes b and c together have a referential integrity constraint to attributes a and b of the same table then in addition i'm going to specify on delete cascade
+ that means if i delete an attribute if i delete a tuple then any other tuple that's referencing the ab values of that tuple with it's bc values will automatically be deleted
+ so let's run the table creation insert our data and then let's take a look at the table and predict what's going to happen when we actually delete a tuple
+ so here's the contents of table t after the insertions
+ so we see that a and b together do form a key
+ all of the ab pairs are unique and furthermore every bc pair has a corresponding ab value in the same table
+ so every tuple except the first the bc pair references the ab pair of the preceding tuple
+ so we have ' ' here referencing ' ' in tuple one
+ our two one here references the two one in table two and so on
+ so our referential integrity constraints are intact for this table
+ what we're going to delete the first tupple by running a command that says delete the tupple whose a value is one
+ when we delete tupple one because we have the cascaded delete set up we will need to delete any tuple whose reference values are one one
+ so that will be couple two
+ so after deleting couple one the referential integrity constraint enforcement will delete couple two
+ when couple two is deleted the two one value will be gone so tuple which references tuple will be deleted then tuple which references will be deleted and so on until the entire table is empty
+ so here's our delete command to delete the first tuple
+ we run the command
+ we go back and we look at the table and when we refresh we see that the table is indeed empty
+ that concludes our demonstration of referential integrity constraints
+ referential integrity is actually extremely common in deployments of relational databases
+ the natural way to design a relational schema often has values in columns of one table referring to values of columns of another and by setting up referential integrity constraints the system itself will monitor the database and make sure that it always remains consistent

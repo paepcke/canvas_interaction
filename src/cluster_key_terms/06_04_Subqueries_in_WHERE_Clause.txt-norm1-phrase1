@@ -1,0 +1,217 @@
+ this sql video which as usual will consist mostly of running live queries introduces sub queries in the where clause
+ as usual we start with our basic select from where expression and we're going to add to it now the ability in the condition part of the select from where expression to include sub queries
+ sub queries are nested select statements within the condition and we'll see they're actually quite powerful
+ as usual we'll be using a sample demonstration database that consists of colleges students and students applying to colleges
+ as always we'll have our four colleges a bunch of students and a bunch of records that show students applying to colleges
+ so let's launch right into our first query that shows a sub query in the where clause
+ what this query finds is the id's and names of all students who have applied to major in cs to some college
+ so here's the sub query in the where clause
+ this expression right here in the where clause finds the id's of all students who have applied to major in cs
+ so now we have that set of id's our outer query says let's take from the students those students whose id is in that set and let's select their id and their name
+ so we go ahead and execute the query and we find out that five students have applied to major in cs
+ now we actually can do this query without a sub query in the where clause
+ so let's take a look
+ we can do it instead by joining the student relation with the apply relation
+ so here we do what we learned in previous videos
+ we take student and apply we write the joined condition to make sure we're talking about the same student we make sure they're majoring in cs and we get their id and their name
+ let's run the query
+ whoops an error
+ i knew that was coming
+ this is just to remind you about disambiguating attributes
+ the id here in the select clause could have come from student or apply and even though the value is equal we do have to disambiguate by putting one of those
+ so let's put student dot sid and let's run the query
+ okay
+ now we see we got more students back than we got back when we ran the query using the sub query
+ let's go back and look
+ we got five results here and we got several more here but the additional results are actually duplicate values
+ so we have two copies for example of amy
+ the reason for that is that amy actually applied to major in cs at multiple colleges
+ so if we go back and we look at the apply data we'll see that amy who is applied to major in cs at stanford as well as berkeley
+ let's hope she selects stanford
+ in any case that's why we got amy twice in the join because she applied twice
+ back here where we used the sub query we were just looking at students and whether their id was in the set
+ okay so when we do the join we get basically the same answer but we have some duplicate values
+ of course we can fix that by adding distinct
+ we run the query and now we have the same result that we got when we used the sub query
+ let's look at some other similar queries and let's focus again on the duplicates issue because it gets a little tricky as we'll see
+ this query is very similar to the previous one finding students who are applying to major in cs but this time we're only getting the names of the students and not their id's
+ so we run the query and we find our same five students
+ just want to mention that these two craigs are two different craigs
+ if we go back to our original result there's three four five craig and five four three craig
+ so coming back here we find the names of the students who majored in cs
+ now similarly to what we did previously let's write this query using a join instead of using the sub query in the where clause
+ so here's the join
+ we're joining student and apply on the student's id majoring in cs as always
+ the only difference is that we're just selecting the name
+ we run the query and we get again many more results than we got previously because we get two copies when a student has applied to to major in cs at two different places
+ and just as we did before we can add distinct to get rid of the duplicates
+ well something different happened this time
+ this time when we get rid of the duplicates we only have four results where previously we had five
+ and the reason is that previously we included the student id in the result and so the two instances of craig were two different craigs and didn't cause duplicates to be eliminated
+ we can see that back here craig and craig
+ but in this result because we only kept the names the two copies of craig turned into one result
+ now we might wonder why do we care about duplicates so much
+ let's see an example where duplicates really do matter quite a bit
+ we're going to do exactly the same query again finding students who have applied to major in cs but now we're not retrieving the ids or names we're retrieving the gpas of those students
+ presumably what we're interested in doing is some analysis of the gpa's of students who choose to apply for cs
+ so let's run the query
+ as always we get our five results
+ and here's the gpa's of the five students who have applied to major in cs
+ once again this will be the last time i promise we'll do this query using a join instead of the sub query
+ so here we go
+ we've got student and apply join on sid majoring in cs and returning the gpa
+ once again because we have students who applied multiple times for cs we're getting more than our five results
+ so we get a rather large number of results here and again we have duplicates
+ so here's where the problem comes in
+ if we use this result to compute the average gpa we'll be counting some students multiple times
+ and presumably that's not what we want to do
+ presumably we want to count each student who's applied to cs once in the computation of say the average gpa
+ that worked in the previous query when we got the five results for the five students who applied to cs
+ when we do the join we get too many results
+ but this time again we're going to have a problem when we do select distinct because some of these students have the same gpa
+ and now we only have four gpas instead of the five that we should have
+ and if we compute the average gpa now then we're not factoring in one of the student's gpas
+ so in this case neither the version with distinct nor the version without distinct gives us the right number of gpas
+ neither of those will give us the correct average
+ the only way to get the correct number of duplicates is to use the version of the query that has the sub query in the where clause
+ now let's move to some different examples that also use subqueries in the where clause
+ you might remember from the previous video when we were learning the difference operator that we had a query that we could write using the difference operator which in sql is called accept but we were unable to write that query without the difference operator
+ and the query we were trying to write is to find students who have applied to major in cs but have not applied to major in ee
+ now that we have sub queries in the where clause we can write that query without using the except operator
+ and here it is
+ the query looks for students where their id is among the set of id's of students who have applied to cs but their id is not among the set of id's of students who are applying to major in ee
+ so let's run the query
+ and we discover that there are three students who have applied to major in cs but not applied anywhere in ee
+ by the way let me just show you a slightly different way to write exactly the same query
+ you can see that we use this key word combination not in to specify that the idea is not in this set
+ we can actually write it by writing the sid is in the set and then applying a not to that result
+ we'll execute and we'll get exactly the same result
+ it's fairly common in sql for there to be multiple ways to write the same query and we'll see more examples of that later in this video
+ so far our examples of sub queries have used in and not in for testing membership in the sets that are produced by sub queries
+ our next examples are going to show that we can apply the exists operator to sub queries just to test whether they're empty or not empty
+ here's the query
+ this query uses exists to check whether a subquery is empty or not empty rather than checking whether values are in the subquery
+ the other new construct that's begin to introduce here's what's known as a correlated reference
+ but inside the subquery we're going to refer to a value c that comes from outside the subquery
+ so let's talk about exactly how this query works
+ first let me tell you what the query is trying to return
+ the query is going to find all colleges such that there's some other college that is in the same state
+ okay
+ so in our example just a reminder we have stanford berkeley mit and cornell
+ so the two colleges we should get back are stanford and berkeley because in each case there's another college in the same state
+ so how does this query work
+ it says we're gonna to take the colleges and for each college we're going to check whether their exists another college and we're going to call that one c where the state of c is the same as the state of c
+ this is sort of similar to what we saw when were doing self joins with table variables but now the variables are appearing in the outer query and the inner query
+ okay
+ so let's run the query and we see that we get the wrong answer
+ that was again intentional
+ well here's the problem
+ when we were in this query c and c could be bound to the same college
+ so every college is in the same state as another college of the other college could be the same college
+ what we need to do is add inside the sub query a further condition that says that c and c are different colleges
+ specifically c cname is not equal to c cname
+ let's run the query and now we get the correct answer
+ now let's look at some other uses of the exists construct and sub query
+ if you happen to already know sql a little bit and someone asks you to write a query where you were going going to get a largest value of some type the first thing you would think of is probably using the max operator but we don't know max yet we'll be learning that later videos
+ and as it happens a number of queries that are effectively computing a max can be written using sub queries
+ and here's our first example
+ this example is finding the college that has the largest enrollment
+ and we're going to do that with the sub query and with the not exists operator
+ specifically we're going to find all colleges where there does not exist another college whose enrollment is higher than the first college
+ so let's go ahead and run the query
+ and not surprisingly we get berkeley as a result
+ so this is a form of query that we can write any time we're looking for something that's the largest or the smallest
+ let's for example look for the student with the highest gpa
+ so we'll change it to the student name and we'll be looking instead of colleges at students
+ otherwise this form of this query is going to stay very similar
+ we're going to look for students here as well
+ and finally we're going to have gpa instead of enrollment
+ so the way this query works is it says i want to find all students such that there does not exist another student who's gpa is higher
+ we run the query and we get four results
+ seems odd
+ actually it's that odd
+ let's just add the gpa to our query and we'll see exactly what happened
+ we can see that these four students all have a gpa of so they're all tied for having the highest gpa and very specifically it faithfully runs the query that there does not exist another student whose gpa is higher than these students
+ now let's see if we can write this same query without using a sub query
+ so as usual if we want to write a query without a sub query we'll need to do some type of joint
+ so we're looking for students with the highest gpas
+ so we need to join two instances of the student relation as we've done here and then we'll apply a condition that the gpa of the first one is greater than the gpa of the second one
+ we run the query
+ wow we got a lot of answers there
+ maybe our problem is just one of duplicates
+ so first thing we do when it looks too big we add select distinct
+ nope that doesn't solve the problem either
+ actually this query is fundamentally wrong and we cannot write the query that finds the student with the highest gpa just by using joins
+ what this query actually does is it finds all students such that there is some other student whose gpa is lower
+ in other words it's finding all students except those who have the lowest gpa
+ now let's see another new construct we can use with sub queries in the where clause and we'll continue with the same query of finding the student with the highest gpa
+ this query uses the all keyword
+ what all tells us is that instead of checking whether a value is either in or not in the result of a sub query we're going to check whether the value has a certain relationship with all the results of the sub query
+ and here in this case we're checking to see if the gpa is greater than or equal to all elements of the sub query that returns the gpa's of all students
+ if the student's gpa is indeed greater than or equal to all gpa's then the student has the highest gpa in the database
+ we'll run the query and we'll get the same four students with the gpa
+ now let's try writing this in a slightly different fashion just for fun to illustrate some concepts
+ once again we're going to try to find the students whose gpa is highest in the database
+ here's how we're going to do it this time
+ instead of using greater than or equal to all we're going to use greater than all
+ so we're going to find all students where their gpa is higher than every other student by saying gpa is greater than all gpa's of students in the database who are not the student we're looking at
+ by saying that the id's are not equal
+ let's run the query
+ well we got an empty result
+ let's think about it for a second
+ that is actually the correct result to the query
+ the query itself was incorrect
+ the query is looking for all students where nobody else has the same gpa as that student
+ everybody else's gpa is lower
+ well remember we had four students with a gpa so none of those students are going to satisfy the query and nor will any other student
+ so this is an incorrect formulation of the query that we wanted
+ now this query would be correct if we knew that every student had the same gp i'm sorry
+ this query would be correct if we knew that every student's gpa was unique because there would be then one student who had the highest gpa
+ so let's modify the query to instead look for the colleges that have the highest enrollment
+ because it turns out in our database every college has a unique enrollment
+ so we'll change it to getting the c name of college instead of student
+ and we'll want the enrollment to be greater than all other enrollments
+ so we'll enrollment college almost done here
+ grab a cup of coffee if you want
+ i just have to make this be c name and this one be c name and we're all set
+ so what are we asking for here
+ we're asking for all colleges whose enrollment is greater than all of the enrollments of colleges that are different than the one we're looking at
+ we run the query and we get berkeley as a result which is exactly what we'd expect
+ so far we've seen the keyword all for checking whether a value has relationship with all of the results of a sub query
+ there's also a key word any that is a companion but instead of having to satisfy a condition with all of the elements of a set any says you must satisfy the condition with at least one element of the set
+ so what we're going to do now is going to do the same query but we're gonna write it a little differently
+ let me just type it in and then explain
+ here what we're going to say is get me all colleges where it's not the case that the enrollment is less than or equal to any other college
+ okay
+ so in other words there's no other colleges have bigger enrollment
+ just think about it for a second this is if you happen to know predicate logic
+ this is an equivalence where when you say for all it's equivalent to not exists not
+ in any case if you didn't follow that don't let that bother you
+ let's run the query and we see we again get the result berkeley so again all tests a condition against every element in the result of a sub query and the condition is true if it's satisfied with every element whereas any is true if the condition is satisfied with one or more elements of the sub query
+ let's use any for another query
+ this query finds all students who are not from the smallest high_school in the database
+ so what we are looking for here is all students where the size of their high_school is greater than any high_school size
+ in other words a student is going to be returned if there's some other student whose size high_school is smaller than this student
+ we run the query and there's the result
+ and you can verify if you look back at the data but there is in fact a few there are students who are from high schools that have students so here we have in our result every student that comes from a high_school bigger than that
+ some systems notably at the current time sqlite do not support the any and the all operators
+ we do not lose expressive power we just have to write those queries a little differently typically using exist or not exists so let's look at the same query written without using any
+ here's what we do
+ we look for students where there exists some other student okay whose high_school is smaller than the student we returned
+ so this is going to give us exactly the same result and we will see we will get the same set of students
+ no students from a high_school with two hundred but we get all the rest of the students without using any or all
+ and just to emphasize any or all are very convenient for writing queries but they aren't necessary
+ it turns out we can always write a query that would use any or all by using the exists operator or not exists instead
+ as a grand finale query let's revisit the query that finds students who have applied to major cs and have not applied to major in ee
+ and now we're going to write that query using the any operator two instances of it
+ now let's go back and look when we wrote the query using in and not in and we see that there are three results helen irene and craig
+ and now let's look at our query using any and not equal to any
+ so we find students where their sid is in the set of sid's of students who have applied to major in cs and their sid is not equal to any of the students who have applied to major in ee and let's run the query
+ well we got the wrong answer and that was once again intentional
+ let's look very closely at what this query asks for
+ this query asks for students students where their id is in the set of id's that applied to cs that's all fine and good but this is where things got tricky
+ what we're saying here is that we want the condition to check whether there's any element in the set of ee's that are not equal to this sid
+ so in fact this second condition is satisfied as long as there's anybody who applied to ee that's not equal to the student we're looking at and that of course is commonly the case so we made a mistake here and it's actually quite tricky to use the any and all operators and always get the right answer
+ it's especially tricky when you can't just eyeball the answer and check but the correct formulation that we want here is that it's not the case that the sid is equal to any member of the set
+ in other words for each member of the set of the ee application that value is not equal to the sid of the student we're going to retrieve
+ and now we run the query and we get the right answer

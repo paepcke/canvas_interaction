@@ -1,0 +1,235 @@
+database management system
+relational data model
+data manipulation language
+hierarchical structure
+database
+relational model
+query languages
+tuples, schema
+attributes
+ad hoc queries
+SQL
+relational algebra
+relation
+closure
+streaming format
+tagged element
+nesting development
+implied ordering
+attributes
+parsed XML
+document object model
+SAX
+extensible style sheet language
+document type descriptors
+XML schema descriptions
+Kleene
+singular ID ref
+plural ID refs
+XML schema
+XML schema descriptor
+typed values
+key declarations
+references
+JSON, objects, arrays, property
+validity, impedance mismatch, JSON Query
+object, array, reserved word, syntactic correctness, JSON schema
+relational algebra, relational algebra query language, key, select operator, project operator
+duplicates, Cartesian product
+natural join
+theta join, theta, relational algebra
+union operator, difference operator, join back, intersection operator
+rename operator
+assignment statements, expression trees, relational algebra
+SQL, Data Definition Language, Data Manipulation Language, select statement
+select statement, distinct, unordered model, order by clause, like predicate
+table variables, set operators, except
+sub queries
+disambiguating attributes, not in, correlated reference, all
+aggregation, having condition, where condition, count function, grouping
+null, tautology
+inserting data, delete data, updating existing data
+inner join, natural join, interjoin, outer join
+Armstrong's axioms, functional dependencies
+designing schemas, anomoly
+decomposition, boyce codd normal form, fourth normal form, third normal form
+multi-value dependency
+functional dependencies, normal form, functional dependency
+key, closure, trivial functional dependency, splitting rule, combining rule
+decomposition, boyce codd normal form, violation, key
+fourth normal form, mega relations
+trivial multi valued dependency
+multi-valued dependency
+intersection rule
+splitting rule
+forth normal form
+XPath
+XSLT
+XQuery
+double slash construct
+implicitly existentially quantified
+navigation axis
+following sibling
+universal quantification
+XQuery
+FLWOR expression
+for clause
+let clause
+where clause
+order by
+return clause
+FLWOR expression
+distinct values
+self join
+XSLT
+XSL
+template
+template matching
+recursively applying templates
+data modeling
+entity relationship model
+unified modeling language
+multiplicity
+association classes
+composition
+aggregation
+translating designs
+applied
+association classes
+applied relation
+self associations
+composition
+aggregation
+index
+balance trees
+hash tables
+physical design advisor
+transactions
+transactions
+ACID properties
+isolation
+serializability
+durability
+atomicity
+transaction rollback
+consistency
+isoluation levels
+transactions
+serializability
+dirty reads
+read uncommitted
+read committed
+global serializability
+repeatable read
+serializable
+global serializability
+phantom tuples
+read only transaction
+isolation levels
+read uncommitted
+read committed
+repeatable reads
+phantom tuples
+constraints
+triggers
+integrity constraints
+non-null constraint
+referential integrity
+foreign key constraints
+tuple-based constraint
+constraints
+foreign key constraints
+key constraints
+primary key
+multi-attribute keys
+attribute based constraint
+tuple based constraints
+check constraints
+general assertions
+referential integrity constraint
+referential integrity
+referential integrity
+integrity constraints
+referential integrity constraints
+foreign key
+foreign key constraints
+referential integrity
+set null
+cascade
+referential integrity violations
+triggers
+referencing variables
+cycle
+Postgres
+SQLite
+MySQL
+triggering event
+referencing clause
+recursive triggers
+nested invocation
+views
+disk pages
+conceptual layer
+logical layer
+temporary table
+modifying views
+rewriting process
+modifying views through triggers
+automatic view modifications
+updatable views
+materialized views
+virtual views
+database authorization
+authorization
+privileges
+grant privileges on the view
+grant statement
+grant option
+revoke privileges
+cascade option
+recursion
+WITH statement
+turing completeness
+recursive queries
+Union operator
+recursive constructs
+recursion
+transitive closure
+recursively defined relation
+recursively defined union
+nonlinear recursion
+linear recursion
+mutual recursion
+negative dependence
+negative subqueries
+online analytical processing
+online transaction processing
+data warehousing
+decision support systems
+star schema
+OLAP queries
+drill down
+rollup
+with cube
+with rollup
+slicing and dicing
+slicing
+dicing
+roll-up operation
+cube query
+NoSQL
+convenience
+safety
+reliability
+NoSQL
+MapReduce
+Hadoop
+map function
+reduce function
+Hive
+Pig
+Driad
+Driadlink
+key value stores
+graph database system
+resource description framework

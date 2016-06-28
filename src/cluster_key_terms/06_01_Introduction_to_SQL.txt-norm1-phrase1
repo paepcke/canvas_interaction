@@ -1,0 +1,46 @@
+ this video provides an introduction to the sql query language
+ sql like the relational model has been around for decades and supports a many billion dollar market
+ the first thing you might be wondering is how you pronounce it
+ is it sql or is it sequel
+ my friends in industry tell me that sequel is the in pronunciation so that's the one i'll be using
+ now sql is supported by all major commercial database systems
+ it has been around a long time and it is a standardized language
+ the standard started out relatively simple but over the decades it's really ballooned
+ there are currently thousands of pages in the sql standard
+ but the essence of the language which is what we'll be learning in these videos is still relatively simple
+ we will be learning primarily the sql standard also known as sql along with some constructs from the sql standard
+ when sql is used it can be used in a database system interactively through a graphical user interface or a prompt so you type sql queries or commands and you get results back or sql can be embedded in programs
+ so the most common use is to embed sql in programs but for the demos in our videos naturally we'll be submitting queries through a gui interface
+ the last thing i wanted to mention about sql is that it is a declarative language
+ that means that in sql you'll write pretty simple queries that say exactly what you want out of the database and the queries do not need to describe how to get the data out of the database
+ the language is also based on relational algebra and i hope you've watched the relational algebra videos
+ now the declarative nature of sql leads to the component of the database system called the query optimizer to be extremely important
+ what the query optimizer does is it takes a query written in a sql language and it figures out the best way the fastest way to execute that on the database
+ now let's talk briefly fully about some terminology and the commands that are in the sql language
+ there's two parts of the language the data definition language or ddl and the data manipulation or dml
+ the data definition language includes commands to create a table
+ we saw that in a previous video
+ it also includes commands to drop table and to create and drop other aspects of databases that we'll be learning about in later videos such as indexes and views
+ the data manipulation language is the language that's used to query and modify the database
+ so in the sql language the data manipulation language includes for querying the database the select statement and then for modifying the database an insert statement a delete statement and an update statement
+ there are many other commands in sql for indexes constraints views triggers transactions authorization all of which we'll be learning about in later videos
+ for now let's just take a look in a little more detail at the select statement which is really the bread and butter of the sql language and it's what we use to query the database
+ so the select statement consists of three basic clauses
+ there's the select clause the from clause and the where clause
+ the best order to think of these actually is first the from clause then the where and then the select and just the basic idea is that the from identifies the relations that you want to query over the condition is used to combine the relations and to filter the relations
+ and finally the select tells you what to return
+ now if you're familiar with relational algebra this expression here this sql query is equivalent to the relational algebra expression that you project the set of attributes a through an
+ and then you select and by the way it's different from this select here
+ in fact this selection corresponds to the where
+ you select the condition on the cross product of the relations that are listed in the from clause
+ so that's the equivalent in relational algebra
+ and the last thing i wanted to mention is that as you know the relational query languages are compositional
+ that means when you run a query over relations you get a relation as a result
+ so the result of this select statement is a relation
+ it doesn't have a name but the schema of that relation is the set of attributes that are returned
+ we'll learn much more about the select statement in future videos
+ in conclusion the sql language is very prominent
+ it's supported by all major commercial database systems
+ it's been standardized over time
+ it can be used through programs
+ it can be used interactively and it's a declarative high level language whose foundations are based on the relational algebra

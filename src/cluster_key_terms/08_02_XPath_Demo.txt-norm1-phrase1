@@ -1,0 +1,216 @@
+ in this video we'll demonstrate xpath by running a number of queries over our bookstore data
+ let's first take a look at the data we've expanded it slightly over what we've been using in previous videos but it continues to have pretty much the same structure
+ we have a number of books
+ books have attributes isbn price sometimes in addition they have a title sub element authors with first name and last name
+ so we have our first course book and our complete book
+ and our complete book also has a remark as you may recall
+ then i've added a couple more books
+ i've added hector and jeff's_database hints by jeffrey ullman and hector garcia molina with a remark an indispensible companion to your textbook
+ i've also added jennifer's economical database_hints for that at a mere price of you get some hints
+ and then finally just to demonstrate certain expressions i've inserted three magazines two national geographics and a newsweek
+ and finally a magazine seen called hector and jeff's_database hints
+ so with this data in mind let's move to the queries
+ we'll start with simple queries and get more complicated as we proceed
+ in this window we'll be putting our xpath expressions in the upper pane then we'll execute the query and we'll see the results in the lower pane
+ the way xpath works the first part of every expression specifies the document document over which the xpath expression is to be evaluated
+ so we have the data that you saw in a document called bookstoreq xml and you'll see in each of our expressions that we begin by specifying that document and then move ahead to the rest of the xpath expression
+ our first expression is a very simple path expression
+ it says navigate through the xml by going first to the root element called bookstore then look at all the books so the elements of book store and finally all the titles of elements
+ let's run the query and we will see our results below
+ so as we can see our results here is actually written in xml little header appears
+ and then we see the four titles of books that are in our database
+ now let's modify our path expression
+ instead of only getting book titles let's get book or magazine titles
+ we do that by extending our middle matching element here to use a sort of regular expression like syntax book or magazine and we put it in parentheses
+ so now it says match any path of the data that starts at the bookstore element follows either a book or magazine sub element and then finally a title sub element
+ when we run the query we see now that we get not only the titles of our books but also the titles of our magazines
+ so far we've mentioned element names explicitly in our path expressions
+ but as i mentioned in the introductory video we can also use what's known as a wild card symbol the symbol star
+ star says to match any element name
+ so now we're going to start again with bookstore match any element below bookstore and finally find titles of elements below those any elements
+ now it so happens that the only elements below bookstore are books and magazines so when we run the query we will get exactly the same result
+ so far we've been navigating with the single slash operator which tells us to go one element at a time
+ we're at a particular element and then we match sub elements with the specific tag that we typed
+ there is also the double slash operator
+ as you recall from the introductory video double slash says match myself or any descendants of myself to any length
+ so if i put a double slash title what we'll be matching is any title element anywhere at all in the xml tree
+ we run the query and again we get exactly the same result because we had already been getting all of the titles which were sub elements of books or magazines
+ now let's get something a little different
+ let's put slash slash star
+ now that's kind of a wild thing to put because it says i'm going to match any element in the entire tree and furthermore it can be of any the element type let's run the query and see what happens
+ what we get is a huge result
+ let me just scroll down so you can see the result
+ in fact what we're getting is every element at every level of the tree including all of its sub elements
+ so in fact the first element in our result is our entire tree because it's our book store element
+ and we'll go all the way down to the end of the book store
+ the next element in our result is some children of the book store so we get the book elements
+ and we're also going to get their children in the answer
+ and as we keep scrolling down we'll see that we get every element of the entire database
+ that's not a useful query but it does demonstrate the construct the double slash matching any element in the tree and the star matching any tag of any element
+ now let's turn to attributes
+ let's suppose we're interested in returning all the isbn number in the database so we'll go back to saying book store books of elements and then we'll get the attribute isbn
+ so we type at sign and isbn
+ let's run the query and we get an error
+ it turns out that attributes cannot be what is called serialized in order to return them in an xml looking result
+ so what we need to do actually is obtain the data from the attribute itself and once we do that we'll see that we're getting the answer that we desire
+ so we'll ask for the data of the attribute run the query and now we see we have all its isbn numbers
+ now the attribute data is just strings so we're returning the isbn numbers as a set of strings with blanks between them
+ so some of these are sort of peculiarities of how xpath works
+ again we were not able to return an attribute because it didn't know how to structure the result but once we extracted the data from the attribute it returned it as string values
+ so far we've only seen path expressions with no conditions involved so let's throw in a condition
+ let's say that we're interested in returning books that cost less_than
+ so what we're going to do here is navigate to the book and then we're gonna use the square bracket which says start evaluate a condition at the current point of the navigation
+ so the condition that i'm going to put is that the price of the book is less_than
+ we'll run that query and we'll see that we have two books whose price three books i apologize whose price is less_than
+ now here we return the book that satisfied the condition
+ what if what we actually want to return is the title of the books whose price is less_than
+ what we can do is after evaluating this condition on the book we can actually continue our navigation
+ so we just put slash title here
+ it says find the books only keep the ones that match the condition and then continue navigating down to their titles and return that as the result of the query
+ we run the query and we see our result
+ now another type of condition that we can put in square brackets is an existence condition instead of a comparison
+ if we put for example just the label remark inside our square brackets that says that we should match books that have a remark
+ so putting an element name in square brackets is an existence condition on that sub element existing
+ once we've isolated the books that have a remark we'll return the title of the books
+ we run the query and we discover that two of our books have a remark
+ you can go back and check the data and you'll see that's indeed the case
+ let's get a little bit more complicated now
+ let's get rid of this query and put in a whole new one
+ in this query we're going to find the titles of books where the price is less_than and where ullman is one of the authors
+ so now we have in our square brackets a longer condition
+ the price is less_than ninety and there exists and implicitly this is an exist there exists a sub part from the book author slash author slash last name where the value of that is ullman
+ if we satisfy both of those conditions it will return the title of the book so we run the query and we discover two books that are less_than where ullman is one of the authors
+ now let's expand the query by adding another condition
+ we want not only the last name of the author to be ullman but the first name to be jeffrey
+ so now we're looking for books where jeffrey ullman is one of the authors and the books are less_than
+ so we run the query and we get the same result not surprisingly since ullman is always paired with jeffrey
+ but actually this is not doing quite what we're expecting and i'm gonna explain why by demonstrating some changes
+ let's say that we change our query to not look for jeffrey ullman as an author but to look for jeffrey widom
+ hopefully we'll get no answers but when we run the query we see still get a book the first course in database systems
+ so the two authors of that book if you look back at the data are jeffrey ullman and jennifer widom
+ so let's see why that book was returned in this query
+ the reason is if we look closely at this condition what we're saying is we're looking for books where the price is less_than and there exists an author's author last name path where the value is widom and there exists an author's author first name path where the value is jeffrey
+ well that in fact is true
+ we have one author whose last name is widom and another author whose first name is jeffrey
+ let's try to formulate the correct that query now
+ so instead of matching the entire path to the last name and then the entire path to the first name separately through the author's sub elements what we want to do so if we want to look at each author at a time and within that author look at the last name and first name together
+ so to modify our query to do that wer're going to use a condition within the condition
+ specifically within the author slash author we'll look at the last name and the first name
+ this syntax error is temporary once we finish the query everything will look good
+ so we put a second bracket there and let me show again what i've done that said we're looking for books where the price is less_than and there exists an author slash author sub element where the last name is widom and the first name is jeffrey
+ hopefully we'll get an empty answer here
+ we execute the query and indeed we do
+ now our original goal was to have jeffrey ullman so finally we'll change jeffrey ullman run the query and now we get the correct answer
+ incidentally it's a very common mistake when we have a condition to put a slash before the condition
+ if we did that we would get a syntax error
+ when we write the square bracket it essentially acts like a slash so when we reference a sub element name within a square bracket we're implicitly navigating that sub element
+ next we're going to try a similar query with a twist
+ we're going to try to find books where ullman is an author and widom is not an author
+ so we we navigate the books as usual and we look for cases where there's an authors author last name equals ullman and there's an authors author last name not equal to widom
+ now you may already detect that the this is not the correct query but let's go ahead and run
+ and we see that we got three books but we know the first two books widom is an author so as you may detected this is not correct
+ what this asks for are books where there's an author whose last name is ullman and there's some author whose last name is not widom
+ well in fact every book with ullman as an author has some author whose last name is not widom
+ that would be ullman
+ so even if i took away this condition and ran the query again i'll get exactly for the same results
+ well actually i got a syntax error
+ i forgot to erase the and so let's get rid of that run the query and now we do in fact get the exact same result
+ so as a reminder we were trying to find books where the last where ullman is an author and widom is not in fact we do not have construct yet to write that query
+ a little later in the demo we'll see how we can in a kind of tricky fashion but for what we've seen so far with path expressions and conditions we're unable to write that specific query
+ so far we've seen two types of conditions in brackets we saw comparisons and we saw existence constraints where we checked to see whether a particular sub element existed
+ as you might remember from the intro we can also put numbers inside in square brackets and those numbers tell us to return the f sub element
+ specifically if we look at this query we're using slash slash to navigate directly to authors elements and then we want to return the second author sub element of each author's element
+ so we run the query and we'll see if we look that our data that jennifer widom jeffrey ullman and hector garcia melina each appear once as the second author of a book or a magazine if we changed this to three we'll be returning third authors only and we can see only jennifer widom as a third author
+ if we change this to ten hopefully we'll get an empty result and in fact we do
+ now let's take a look at some built in functions and predicates
+ in this query we're going to find all books where there's a remark about the book that contains the word great
+ so we're going to navigate using slash slash directly to book elements and within the book element we'll have a condition that invokes the built in predicate contains which i mentioned in the introductory video which looks at two strings and checks whether the first string contains the second one
+ so if we have a book where there's a remark which is a string that contains the word great then the book matches the condition and will return the title of the book
+ we run the query and we see that we have one book that has the remark containing the word great
+ our next query does something kind of new
+ i like to call this query a self join but that's probably only because i'm a relationally biased person
+ but what it's actually doing is querying sort of two instances of our bookstore data at once and joining them together
+ so we'll see that our doc bookstore appears twice in this expression
+ let me explain what this expression is doing
+ it's finding all magazines where there's a book that has the same title as the magazine and here's how it does it
+ so our first path expression navigates two magazines and then it extracts in the condition the title of the magazines
+ the magazine will match if the title equals some book title and so to find the book titles we need to go back to the top of the document so we get a second incidence of the document and we find book titles
+ now when we have the equals here this equals is implicitly be existentially quantified
+ did you follow that
+ implicitly existentially quantified
+ that means that even though we're doing equals on what's effectively a set the condition is satisfied if some element of the set is equal to the first title
+ okay
+ there's a lot of implicit existential quantification going on in equality in xpath and in xquery as well as we'll see later on
+ in any case let's run the query and we will get back the fact that the magazine called hector and jeff's_database hints has the same title as a book and if you look back in the data you'll see we do have a book of the same name
+ we saw one example of a built in predicate contains
+ this example shows another built in function in this case the name function and it also shows our first example of a navigation axis
+ we're going to use the parent axis
+ what this query is going to find is all elements whose parent element tag is not bookstore or book
+ of course this is just for demonstration purposes
+ it's not really that useful of a query
+ but let me just walk through the construction of the query
+ so we're starting with our bookstore and then we're using which finds all elements
+ we saw earlier when we ran the query we saw that it matched every element in the book in the database
+ now since we've already put in bookstore
+ we're not going to match the bookstore element itself but we'll match every child of the bookstore element
+ so what the condition looks for is the tag of the parent of the current element and it sees if it's book store or book and we return the element if it's neither book store or book at the parent tag
+ here's how we find the parent tag
+ so name is a built in function name operates on an element and it returns the tag of that element
+ the element we want to look at is the parent of the current element and the way we do that is with the parent navigation axis which is parent colon colon
+ finally the star is matching the tags of the parents
+ well here we say match any tag of the parent extract the tag and check if it's book store or book
+ so when we run the query we'll see that we get that pack a lot of data but all of them are elements in the database whose parent is not the book store or book
+ here's another example of a navigation axis
+ in this case we're using following sibling
+ following sibling says if we are at a specific point in the tree you should match every sibling so every other element at the same level that's later in the document that follows the current sibling
+ so let's walk through this expression and see what we're doing
+ what this expression is looking for is all books and magazines that have a non unique title
+ in other words all books or magazines where some other book or magazine has this same title
+ so we navigate down to books or magazine elements this is what we saw in one of our earlier path expressions we'll match any book or magazine element and then we want to find one where the title is equal to some title of a later sibling
+ now our books and magazines are all at the same level in our data so when we do following sibling we're going to be matching all other books and magazines that appear after the current one
+ and again this star says that we can match on element of any type
+ we could equivalently put book or magazine in here because we know they're all books or magazines and we'll do that in a moment but for now let's just focus on running the query
+ so we execute the query and we find two answers
+ we find hector and jeff's_database hints which is a book because we had a magazine of the same title and we find national geographic which is a magazine because there's another magazine of the same title
+ so actually this query was somewhat incomplete
+ and that was our fault
+ the way we wrote the query we said that we want to return book or magazine elements when a later one has the same title
+ so that doesn't actually return all of the ones with non unique titles it only returns the first instance of each one with a non unique title
+ let's modify the query to do the right thing
+ what we need to do is not only check whether the title equals the following sibling title of some book or magazine but whether it might also equal a proceeding one
+ so we add title equals the same construct using the proceeding sibling axis slash slash title
+ here we go and now when we run the query we see that we get hector and jeff's_database hints and national geographic but we also get another instance of national geographic and another instance of hector and jeff's_database hints
+ so now we have the correct answer
+ we don't only get the first instance of duplicated titles but we get both of them
+ now to show the use of the star we were matching any book or magazine as the following sibling
+ what if all we were interested in is cases where there's a book that has the same title but not a magazine and we can do the same thing here
+ in that case we shouldn't get national geographic anymore
+ let's run the query and indeed all we get in fact is hector and jeff's_database hints as a magazine because that was the only instance where there was an actual book that had the same title as opposed to matching books or magazines with the star
+ don't take a look at this query yet
+ let me explain what i'm doing before you try to untangle the syntax to do it
+ as i mentioned earlier xpath revolves around implicit existential quantification
+ so when we are looking for example for an author whose name is ullman implicitly we will match the path if any author has the last name ullman
+ and in general most of xpath revolves around matching sets of values and then returning things if any element of that set matches the condition
+ what if we want to do universal quantification in other words for all
+ that turns out to be more complicated but we can do it in a tricky fashion
+ so what i'd like to do with this query is we're going to find books where every author's first name includes j
+ if we wrote it in the fashion that we might be tempted to or we just say book author author first name includes j then we'll get books where some authors first name contains j
+ to get books where all author's first names contains j is more difficult and the way we're going to do it is it's kind of a kluge we're going to use the built in function count
+ so here's what we're doing in this query
+ we're finding all books where the number of authors whose first name includes j is the same as the number of authors of the book without a condition okay
+ so specifically under book we count the number of matches of an author's author sub element where the built in function the built in predicate contains is true where the first name contains j
+ and so we are counting the number of authors whose first name contains j and we're setting that equal to the count of the first name sub elements
+ we'll run the query and we will find indeed that there are two books where all of the authors' first name includes j
+ we can use a related trick to write the query we tried to write earlier but failed to find books where ullman is an author and widom is not an author
+ so with the implicit existential what happened before is that we found books where there was an author whose name was ullman and then there was an author whose last name was not widom
+ and of course we still got everything back
+ what we want to find is books where there's a last name that's ullman and where none of the authors have the last name of widom
+ that's effectively again a universal quantification for all
+ for all of the authors their last name is not widom
+ since we don't have a for all construct in xpath we're again going to use the count trick
+ so in this query we're looking for books where one of the authors' last name is ullman and the number of authors using count again the number of authors whose last name is widom is zero
+ so now we've expressed that query we run it and we get the correct answer
+ that concludes our demonstration of xpath
+ we've shown a large number of constructs and we've written some fairly complicated queries
+ on the other hand we certainly have not covered the entire xpath language
+ if you're interested in our many online materials we'll also provide a data and we encourage you to experiment on your own

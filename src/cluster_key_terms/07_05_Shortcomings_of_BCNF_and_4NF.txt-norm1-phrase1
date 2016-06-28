@@ -1,0 +1,111 @@
+ the last several videos talked about boyce codd normal form and fourth normal form as describing good relations
+ as a remainder boyce codd normal form is based on functional dependencies and it is says whenever we have functional dependency on a relation the left hand side needs to be a key or contain a key
+ fourth normal form uses multi value dependencies and says whenever we have a non trivial multi value dependency again the left hand side is a key
+ and as a reminder functional dependencies are also multi value dependencies so fourth normal form implies boyce codd normal form
+ what we can see in this video is a few examples where boyce codd normal form or fourth normal are actually not necessarily desirable for the specific relations we are designing
+ as usual we'll be using our college application information database although each of our examples will be a bit different
+ for our first example let's take a look at the relation
+ and let's suppose that we have the student's social security number the college that they are applying to the date of the their application and the major they are applying for
+ and further more let's say that each student can apply to each college only once and for one major
+ so that would be on one date for major
+ furthermore let's suppose that all of the colleges in our database have non overlapping application dates
+ and this is obviously contrived for the specific example that we want to demonstrate
+ so under these assumptions the functional dependencies for our relation will be that the social security number and the college name determine the date and the major
+ and so that's based on our first assumption
+ and we have one more functional dependency which is that the date determines the college name and that's based on our second assumption
+ so if we have two tuples with the same date they have to be the same college because colleges have non overlapping dates
+ so using these functional dependencies we can determine that the key for the relation is social security number and college name together since they determine the other two attributes
+ so is this relation in boyce codd normal form
+ the answer is no and the reason is the second functional dependency which does not have key on its left hand side
+ so let's follow the decomposition process and create two relations from our big relation
+ the first one will have the attributes from the violating functional dependency
+ and the second one will have all the remaining attributes plus the left hand side of the functional dependency
+ so that would be the social security number the date and the major
+ so did we think this is a good design
+ it certainly is in boyce codd normal form but i would argue it is not really a good design
+ we do correctly factor out the information connecting the application dates and the colleges
+ on the other hand we've now separated a student's application the date and the major of their application from the college they're applying to so even to check this first functional dependency here would require us to join these two relations together
+ intuitively we might just prefer to keep that information together even if we are capturing some information multiple times
+ so i'd say not necessarily good design here
+ and there is another normal form it's called third normal form and i'm not going to define it here but third normal form actually allows this relation here to stay as is without being decomposed and you can read about third normal form in any of the readings mentioned on the website
+ just to put third normal form in context we'll go back to our venn diagram
+ remember that fourth normal form is stronger than boyce codd normal form
+ so everything that's in fourth normal form is also in boyce codd normal form and third normal form is even weaker than boyce codd normal form
+ so if we have a relation that's in third normal form it's not necessarily in boyce codd normal form and here's an example of one that's not but if we have something in boyce codd normal form it is in third normal form
+ and again you can read about third normal form on the readings from the website
+ for our second example lets go back to our student relation
+ and now we're going to have a student's social security number the high schools that they've attended their gpa and their priority for admission
+ and let's assume that students might attend multiple high schools and that the priority is determined from the gpa
+ so in that case our functional dependencies in this case are social security number determines gpa
+ we're going to assume that students have one gpa
+ we'll have gpa determines priority and by the way we also have using the transitivity rule social security number determines priority
+ the key for this relation is the combination of social security number and high school name
+ because students could go to multiple high schools but once we have the social security number we do functionally determine through these functional dependencies the remaining attributes the priority and the gpa
+ so is this relation in bcnf
+ no it's clearly not
+ and in fact all three of our functional dependencies violate bcnf
+ so let's go ahead and do the decomposition
+ so we'll decompose into s and s
+ let's start with the social security number determines priority
+ so then we'll have social security number and priority in s
+ and in the other one we'll have all the remaining attributes and the left hand side high school name and that would be the gpa
+ then the second one still needs to be decomposed further so that one will become s and s
+ s will have the social security number and the gpa based on the first functional dependency and then s will have the social security number and the high school name
+ and then we take away s
+ now do we think this is a good design
+ again i would say not necessarily
+ it doesn't quite feel right for one thing we've lost the gpa to priority functional dependency
+ we can join the two relations s and s to check that dependency but it would be nice if that dependency were together in a relation and in fact in this case we can have a boyce codd normal form relation that does maintain that dependency
+ so if we had made s have gpa and priority together then we wouldn't have needed s and we're actually still in boyce codd normal form
+ so that would would have happened if we had started with the functional dependency which is also implied that was ssn to gpa and priority
+ actually way back in the decomposition algorithm
+ i mentioned that sometimes when people use that algorithm they try to start with the biggest functional dependencies they can to get a better end design
+ and this is a case where we would want to do that if we prefer to end up with a design with just these two relations
+ so overall with the first two relations that illustrated when you have boyce codd normal form and fourth normal form it's possible that after the decomposition there's no guarantee that all of our original dependencies can be checked on the decomposed relations
+ they may require joins of those relations in order to check them
+ now lets look at a different type of example
+ let's suppose that we have a relation that contains the scores of students who are applying to college so we'll have the student's social security numbers for and their name
+ and then sat scores and act scores and they might have many sat's and act's
+ so the only functional dependency we'd have in that case is the one that says social security number determines the student name and as far as keys go there's no key
+ now in this example we do have a multi valued dependency
+ if a student has several sat and act scores we can assume they're independent of each other
+ and so that's captured in the multi valued dependency that says for a given student identified by their social security number and name if they have a set of sat scores those sat scores are independent of the rest of the attributes
+ you remember that from the mvd video which in this case would be act
+ in that case we'll have for each student every combination of their sat and act scores
+ so is this relations in fourth normal form
+ well clearly it's not we have a violating multi value dependency here since it doesn't have a key on the left hand side and we also have a violating functional dependency
+ so let's quickly do the decomposition
+ we'll start with the multi value dependency so that would give us in the first relation the attributes of the multi value dependency and then it will give us the attributes that are remaining plus the ones on the left hand side
+ so social security number student name and act
+ so now we're done with the multivalue dependency
+ actually in this case because it's now a trivial multivalue dependency when it covers all attributes and now let's take a look at the functional dependency that's still a violation because the social security number is not a key on the left hand side for either of these relations
+ so we'll split s into s and s
+ s will continue the social security number and student name and s will contain the social security number and the sat
+ and actually similarly need to split s
+ and that will give s which contains the social security number and the act score
+ and so now regard of s and s
+ an just in case you're getting confused at this point this is our final schema
+ and this schema is in fourth normal form
+ and that's good we've separated out all the relevant facts
+ so actually it feels like a pretty good schema
+ but let's suppose now that all of the the queries that we're going to run on these relations
+ take a social security number and what they return is the student's name and some composite score that's based on all of their sat and act scores and again let's suppose every single query does that
+ if that's the case then every query is going to have to recombine all of these three relations in order to compute it's results
+ so we might have been better off even if it included some redundancy and some additional storage with our original design because each query again is going to access all of the data in that one relation
+ so there is something called a de normalize relation
+ and when queries tend to access all attributes when every query would be reassembling the normalized relations it actually might be preferable to use one that is quote de normalized
+ and here's our final example
+ this time let's talk about college information
+ so we have a college and the state it's in
+ let's suppose we have some other information and we decide to put it in separate relations we have the size of the college the number of students in the college and we might have the average sat score for each college the average gpa for each college and maybe some additional relations each containing one fact about the college
+ so all of these relations in boyce codd normal form and first normal form yes they are actually for each relation we have a functional dependency from the college name to the other attribute but the left side will be a key so were in a good shape
+ is this a good design
+ once again i say not necessarily we may not want to decompose so much
+ i sort of feel like this relation is too decomposed because we can capture all of the information in one relation or a couple of relations still being in boyce codd normal form
+ so one of the problems i actually like to give in my database class is to create a theory of composition that's sort of a compliment to the theory of decomposition figuring out when you can take multiple relations and combine them while still staying in a desirable normal form
+ so you might give that a thought
+ so in conclusion when designing a database schema there are often many different designs that are possible some of the designs are much better than others and we have to have a some way of choosing the design we want to use for our application
+ we do have a very nice theory for relational database design that we've gone through in the past several videos
+ we define normal forms that tell us when we have good relations
+ we have a process for designing by decomposition and it's usually quite intuitive and works well
+ there are however some shortcomings to the normal forms that we've defined and in this video we saw some specific shortcomings involving and forcing dependencies in decomposed relations about considering what the query workload might look like when one does one's database design and finally the possibility of over decomposing one's relations unnecessarily

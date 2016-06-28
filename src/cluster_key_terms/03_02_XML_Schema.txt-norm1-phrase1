@@ -1,0 +1,136 @@
+ in this video we'll be learning about xml schema
+ like document type descriptors xml schema allows us a way to give content specific specifications for our xml data
+ as you may remember we send to a validating xml parser or xml document as well as a description
+ we talked about dtds in the last video
+ we'll talk about xsds in this one
+ the validating xml parser will check that the document is well formed and it will also check that it matches it's specification
+ if it does xml comes out
+ if it doesn't we get an error that the document is not valid
+ xml schema is an extensive language very powerful
+ like document type descriptors we can specify the elements we want in our xml data the attributes the nesting of the elements how elements need to be ordered and and number of occurrences of elements
+ in addition we can specify data types we can specify keys the pointers that we can specify are now typed like in dtds and much much more
+ now one difference between xml schema and dtds is that the specification locations in xml schemas called xsd's are actually written in the xml language itself
+ that can be useful for example if we have a browser that nicely renders the xml
+ the languages i said is vast
+ in this video we're going to show one sort of quote easy example
+ but that example will give very much the flavor of xml schema
+ and we'll try to highlight the differences between xml schema and using document type descriptors
+ ok here were are with our xml document on the left
+ on the right we have our xml schema descriptor or xsd and we have a little command line that we're gonna use for our validation command
+ now let me just say up front that we're not going to be going through the xsd line by line in detail the way we did with dtds
+ as you can see it's rather long and that would take us far too long and be rather boring
+ so what i highly suggest is that you download the file for the xsd so you can look at it yourself and look at the entire file as well as the xml and give it a try with validating
+ what i'm gonna do in this demo primarily is focus on those aspects of the xsd that are different are more powerful than we had in document type descriptors
+ first let's take a look at the data itself
+ so we have our bookstore data as usual with two books and three authors
+ its slightly restructured from any of the versions we've used before
+ it looks closest to the last one we used because the books and authors are separate and the authors are actually exactly the same
+ the have an identifier and a first name last name sub element
+ but the primary difference is in the books instead of using id refs attributes to refer from books to authors we still we now back our back having an author's sub element with the two authors underneath and then those authors themselves have what are effectively the pointers to the identifiers for the authors
+ and we'll see how that's going to mesh with the xml schema descriptor that we're using for this file
+ so the other thing i want to mention is that right now we have the xml schema descriptor in one file and the xml in another
+ you might remember for the dtd we simply placed the dtds specification at the top of the file with the xml
+ for dtds you can do it either way in the same file or in a separate file
+ for xsds we always put those in a separate file
+ also notice that the xsd itself is in xml
+ it is using special tags
+ these are tags that are part of the xsd language but we are still expressing it in xml
+ so we have two xml files the data file and the schema file
+ to validate the data file against the schema file we can use again the xml link feature
+ we specify the schema file the data file and when we execute the command we can see that the file validates correctly
+ so i'm now going to highlight four features of xml schema that aren't present in dtd's
+ one of them is typed values
+ one of them is key declarations
+ similar to ids but a little bit more powerful
+ one is references which are again similar to pointers but a little more powerful and finally a currents constraints
+ so let's start with tights
+ in our data we see that the price attribute is denoted with a string and when we had dtds all attribute values were in fact stringed
+ in excess fees we can say that we want to check that the values which are still look like strings actually confirm to specific types
+ for example we can say that the price must be in integer
+ again i'm not going to be labor the syntactic details but rather i'm just going to highlight the places in the xsd where we're declaring things of interest
+ so specifically here's where we declare the attribute price and we say that the type of price must be an integer
+ so our document validated correctly what if we change this one hundred to be foo instead
+ of course with a dtd this would be fine because all attributes are treated as strings
+ but if we try to validate now we see an error specifically foo is not a value of the correct type
+ so let's change that foo back to a hundred so that we validate correctly
+ next let's talk about keys
+ in dtd's we were able to specify id's
+ id's were globally unique values that could be used to identify specific elements
+ for example when we wanted to point to those elements using id refs
+ keys are a little bit more powerful or more specific i should say
+ if you think about the relational model a key in the relational model is an attribute or set of attributes that must be unique for each tuple in a table
+ so we don't have tables or tuples right now but we do have elements and we often have repeated elements
+ so similarly we can specify that a particular attribute or component must be unique within every element of the same type
+ and we have two keys in our specification one key which we can see here for books and one for authors
+ specifically we say for books that the isbn attribute must be a key
+ and we say for authors that the ident attribute must be a key
+ so let's go over to our data and let's start by looking at the authors
+ so if we change for example u to hg then we should get a key violation because we'll have two authors that have the same ident attribute
+ let's try to validate
+ in fact we do correctly get a key validation we also get a couple of other errors and those have to do with the fact that we are using these items as the destination of what are affect doubly pointers or references
+ so let's change that back to ju make sure everything now validates fine and it does
+ now lets make another change
+ so we have the ident key here and we have the isbn number being the number for books what if changed the isbn number to one of the values we used as a key for the author say hg
+ when we did something similar with dtds we got an error because in dtds ids have be globally unique
+ here we should not get an error
+ hg should be a perfectly reasonable key for books because we don't have another value that's the same
+ and in fact it does validate
+ now let's undo that change
+ next let's talk about references
+ so references allow us to have what are possibly typed pointers using the dtd
+ so they are called key refs and here we have an example let me just change this to the middle of the document
+ so one of the reference types that we've defined in our dtd is a pointer to authors that we're using in our books
+ specifically we want to specify that this attribute here the auth ident has a value that is a key for the author elements
+ and we want to make sure it's author elements that its pointing to and not other types of elements
+ now the syntax for doing this in xml schema is rather detailed
+ its alright here and just to give you a flavor this middle selector here is actually using the xpath language which we'll be using which we'll be learning later but what it says is that when we navigate in the document down to one of these auth elements
+ within that auth element the auth ident attribute is a reference to what we have already defined as author keys
+ we've done something similar with books
+ we have our book remark bookref that brings us down to this element here
+ and there we specified that the book attribute must be a reference to a book key and the book key was earlier defined to be the isbn number
+ again i know this is all complicated and the syntax is very clunky so i urge you to download the specification and spend time looking at it on your own
+ now let's make a couple of changes to our document to demonstrate how the checking of these typed pointers works
+ for example lets change our first reference here to food
+ let's validate the document and we should get an error and indeed we do the author key rep is incorrect
+ now lets change that fu to jw so originally it was ju but now we're going to have two authors both of whom refer to jw
+ now this should not be a problem
+ it's simply two pointers to the same author and we did not prohibit that in our xmls schema specification and indeed our document validates
+ we'll change that one back
+ and the last as a last change we'll change our book reference here to refer to jw
+ this should not validate because this time unlike with dtds we're we've actually specified typed pointers
+ in other words we've specified that this pointer or this reference must be to a book element and not to an author element
+ so we'll validate and indeed it fails
+ i've undone that change and now let's move to the last feature that we're gonna look at in this demonstration which is a currents constraint
+ so in let me just bring up the first instance of it in xml schema we can specify how many times an element type is allowed to occur
+ specifically we can specify the minimum number of occurrences and the maximum number of occurrences
+ as a default if we don't specify for an element the minoccurs or maxioccurs the default for both of them is one
+ so here for books we've said that we can have zero books and we can have any number
+ so this is the maximum flexibility any number of elements
+ for authors we've also said we can have any number of authors that's in the actual database itself
+ remember that our book store consists of a set of books and a set of authors
+ but we are going to specify something a little different for how many authors we have within a specific book
+ so let's continue to look at other cases where we've specified occurrence constraints
+ here is the case where we're specifying how many authors we have within a book and again few boy this is a lot of xml here so take your time when looking at it or for now just take my word for it
+ what we're specifying here is how many sub elements how many auth sub elements we have within each author's element
+ and here we have no minoccurs specification only a maxoccurs
+ that means by default minoccurs is one
+ so what this is saying specifically is that every book has in it's authors sub element atleast one off but we can have
+ any number of them that's the string unbounded
+ looking at the remaining occurrence constraints for remarks we have the minimum number of occurrences is zero
+ in other words we don't have to have a remark
+ and we haven't specified max occurs so the default max occurs is one
+ so what we're saying here is that every book may have either no remark or exactly one remark but it may not have more than that
+ and there's a few more occurrence constraints that you can take a look at again as you browse the xml schema description on your own
+ now let's make some changes in the document to test these occurrence constraints
+ so first let's remove the authors from our first book
+ we won't remove the whole author sub element but just the two off sub elements of authors
+ we attempt to validate and we see that it doesn't validate
+ we're missing some child elements specifically the off child elements because we expected there to be at least one of them
+ incidentally if we took the entire author sub element out we'll also get an error since we've specified the books must have author sub element
+ so now we're missing the entire author structure in that book and again we don't validate
+ let's put authors back and now let's look at the remark occurrence constraint so we said that every book can have zero or one remarks so let's just add another remark to this book
+ oh hi actually remarks are allowed to be empty
+ in any case we have added a small remark
+ we validate and we see that we have too many remarks again because we specified that every book can have at most one remark
+ so that concludes our demonstration of xml schema again it's been rather cursory we've only covered a few of the constructs but i did focus on the constructs that we have in xml schema that are not specifiable in dtds
+ finally one more time i urge you download the access fee and the document and play around with it yourself

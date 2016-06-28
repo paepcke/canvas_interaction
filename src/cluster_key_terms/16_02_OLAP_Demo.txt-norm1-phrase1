@@ -1,0 +1,264 @@
+ in this video we'll be doing a live demonstration of olap
+ we'll create a star schema similar to the one we used in our previous examples
+ it will be sales data with a fact table and several dimension tables and then we'll do several different types of olap queries
+ we'll show a full star join over the star schema
+ we'll show some examples of drill down and roll_up
+ we'll also show what's known as slicing and dicing which we haven't explained yet we'll just do when we get to those queries
+ and finally we'll show the with_cube and with rollup clauses that have been added to the sql standard for olap queries
+ for those we'll be using mysql actually for the whole demo we'll be using mysql
+ mysql supports with roll_up
+ neither of the other systems that we've been using sequel lite or postgres supports with roll_up yet
+ and mysql does not yet support with_cube but we'll see that we can simulate the behavior with_cube using with rollup command of mysql
+ so let's move to the demo
+ here we are in the demo we have a fact table that contains information about stores items and customers
+ we don't see much here except their id values
+ and we have sixty tuples loaded up in our fact table
+ our dimension tables are the customer table
+ we have four customers with a gender and an age
+ we have our item table five items a category of the item just t_shirts and jackets just in blue and red and finally we have our stores
+ and we have six stores that are in various cities in santa_clara san_mateo county in california and king county in washington
+ our first query is simply the complete star join
+ so we're joining all four tables using the foreign key references in the fact table to the keys and the dimension tables
+ now since these are foreign key references you can think of this star join as simply extending the tuples in the sales table with further information about the store item and customer mentioned in each one
+ so here we go
+ and we should expect again sixty tuples in the results one for each tuple in the fact table and we can see that we have the information from the fact table but then we also have more information that we've joined in from the dimension tables
+ now it's not typical to do the complete star join usually we would have at least constrained the star join in some way
+ so our next query will do selections and projections on the join
+ we're going to limit ourselves to sales where the state of the sale is california the category is t shirt the age of the customer is less than and the last condition is actually over the fact table saying the price of the purchase was less than
+ and now we'll return the city color customer name and price of the item
+ we run the query and we see now that we have just sales that meet our criteria
+ so we've seen the join with constraints on the join but what's even more common in olap applications is to do grouping and aggregation in order to analyze the data
+ and we're going to start by looking at grouping it in the aggregation involving the dimension attributes in the group by and then the dependent attribute being aggregated
+ this is a very common form of query
+ so here we'll say we want to analyze our data based on combinations of stores and customers
+ so we'll group by store id and customer id
+ and then we'll sum up to see the total sales for each combination of store and customer
+ so here's our result
+ now maybe not that meaningful to us right now just looking at the store ids and customer ids but for an analyst it might be meaningful
+ we'll see in a moment doing group by an aggregation on other attributes that look a little more interesting
+ so now i'll demonstrate the concept of drilling down
+ so you might remember drilling down says that we're looking at data that's aggregated in some fashion and we decide we want more detail
+ we get more detail by adding more attributes to the group by so let's say in this case i want to break out not only by store and customer but also by item
+ so i'll add item id to the group by and also to the select and when i run this query i see that i get more results and i now have more detail in the analysis of the data
+ now i don't have tumbles in my result even though i'm grouping by all three dimension attributes because i do have in my fact table more than one tuple for some combinations of store item and customer
+ next i'm gonna introduce a query that shows the concept called slicing
+ slicing of course evokes the data cube
+ we've talked about the data cube in the previous video and we specifically used this example to demonstrate a three dimensional data cube
+ so the idea of a slicing query is a query that analyzes a slice of the cube and it does that by constraining one of the dimensions
+ so what i am going to do is add to this query a constraint that says let's only consider sales that are from the state of washington
+ and when i add that we'll continue to do the group by an aggregation but only on that slice of the cube representing washington stores the sales that are from washington stores
+ so it made a few changes to the query
+ the first thing we see is that i added the store relation to the from clause in order to constrain the state of the sale i have to join with the store table that dimension table so that i can access the value of state which is not present in the sales table
+ so i also had to add variables and i add the join condition for the sales table to join with the dimension table and then i add the constraint that the state is washington
+ the last small change is to add a variable to the store id so that i don't get an ambiguous error
+ so now let's go ahead and run the query and we see that we do get a subset of what we had before
+ and that subset is the slice of the data cube if you want to think of it that way representing the sales in washington state
+ now in addition to slicing there is also a notion of dicing and again if you imagine the data cube what a dice does is slice in two dimensions and it gives you a chunk of the cube
+ so i am going to add a condition on the item being sold
+ i am going to add that the item must be red
+ so then i'm going to be looking at the chunk of the data cube that identifies red items purchased in the state of washington
+ so here's the query i've added a third relation to the from clause
+ i added the item dimension tables so that i can constrain the color to be red
+ i have added a join condition joining the fact table to the item dimension table
+ i have added the condition that the color is red
+ and finally i had to add again the variable names to make sure i didn't get ambiguous attribute references
+ so we'll run this query
+ and we see that we get an even smaller portion of the data cube
+ again a dice where we have constrained two dimensions
+ so we have seen drilling down and slicing and dicing now let's take a look at rolling up
+ rolling up says that we're looking at our data analysis and we decide that it's too detailed
+ we want to have less detail in other words more aggregation
+ to do that we take attributes out of the group by clause
+ so let's say this is way way too much detail and we just want our sales broken down on item
+ so we take all of the attributes out of our group by clause except for item
+ here we go
+ and then when we run the query we'll see much more summarized data
+ and here it is broken down again just by separate items
+ so far our grouping and aggregation has been on the dimension attributes specifically the id attributes identifying the tuples in the dimension table
+ and that may be meaningful for analyses but for this demonstration it's more fun to look at attributes that actually mean something to us
+ so let's try a few queries that group instead based on attributes in the dimension tables
+ we'll still be using the fact table
+ we'll be joining it with dimension tables
+ and here we're going to start by grouping on the state and the category of the sales
+ again summing up the total sales for the different groups
+ so here we see that we have four combinations of state and category california or washington jackets and t_shirts and then we have the total sales in each of those so we can see in both states the sales for jackets account for considerably more than the sales for t_shirts but we do also notice that in california there's a lot more sales of t_shirts than there are in washington and i guess that's not surprising given the weather
+ now let's demonstrate drill down on this query
+ so let's say we want a little more information
+ maybe we want a breakdown by county in addition to state
+ so to do that we add county to the group by clause and the select clause and when we run the query we see we do now have more detail
+ we can see for example that we had more jacket sales in santa_clara county than in san_mateo county although the t_shirts were approximately equal
+ a little actually more t_shirts in san_mateo
+ this is a little surprising because santa_clara is generally warmer than san_mateo but it's fabricated data
+ now let's see we want it drilled it out even further and we want to break our data down by gender as well as the other attributes
+ in order to drill down based on gender i first needed to add the customer table to our from clause
+ prior to this we weren't doing any analysis that involved any attributes of the customer table
+ and so i need to add the join condition here
+ and then to do the drill down i add the gender attribute to the group by and to the select
+ we run the query and what do we find
+ well we can see for example that not too many females in san_mateo county are buying t_shirts
+ most of those t shirt sales are counted for by males
+ the other thing we notice is that we don't have every single combination of county category and gender
+ very specifically we look and we can see that no males in king county bought any t_shirts
+ so we only have in our result those combinations of dimension values that actually appear in the fact table
+ or in the join of the fact table with the dimension tables
+ now let's suppose after i've gotten to this level of analysis i've decided that what might be most interesting is the data broken down just by combination of state and gender
+ so that would be a roll_up operation
+ and remember for roll_up i take attributes out of the group by clause
+ so i take out the county and category and i'm just interested in state gender combinations
+ by the way at this point if i wanted to i could remove the item table because i'm no longer constraining based on items or grouping based on items
+ but i'll just leave it in for now it's not going to make a difference in our result
+ of course for efficiency i might just prefer to take it out
+ anyway let's run the query and now we see that rolled up data
+ and when we look at it i guess our main conclusion here would be that in our database the californian males are the big spenders
+ so far everything we've seen has actually just used the regular sql constructs that we already knew about
+ although we were demonstrating them over a star schema and we're showing the types of queries that one tends to run over star schema's in olap applications
+ now we're going to move to the specific constructs that have been added to sql for olap
+ as you may remember the two constructs are called with_cube and with rollup and they are written in the group by clause
+ so our first query is the absolute basic cube query
+ we start with our sales fact table we group on all three of its dimensions and then we add with_cube
+ and what we're going to get is basically the data in the data cube that we saw in our previous video that introduced the cube
+ let's go ahead and run the query
+ disappointingly we get an error message that this version of mysql doesn't yet support cube
+ actually no version of mysql supports cube at this point in time but we're hopeful that a future one will
+ in fact of the three open source systems that we have been using for our demos only mysql supports the with rollup so we will continue with mysql and in fact you can get the same result that you would get if with cube was supported using with roll_up although it's a little bit contorted but i'll do that now to demonstrate what you would get if you wrote with cube
+ so here's the query i'm not going to explain it if you're particularly interested in it you can download our script and exam it yourself
+ again what i'm most interested in is looking at the results and here they are
+ so this result is the result of a with_cube on the grouping and aggregation on all dimensions of our sales table all three dimensions
+ so some of our tuples look very normal
+ this first tuple second and third tuple are all giving us the total price for combination of store item and customer and these are exactly what we got in our original query that didn't have the with_cube operator
+ but now we see some tuples that have blanks and as a reminder blanks in this interface mean null
+ so this tuple is store item and null
+ and what this corresponds to is an element on the face of the cube
+ so this is the face of the cube that's not constraining the customer dimension
+ and what the value gives us then is the value we have on the face of the cube which is the total sales for the combination of store one and item one and any customer and that's seventy
+ and we can cross check that by seeing that the first three tuples add up to because those happen to be the three customers that have made purchases at store and item
+ and we can similarly see for store and item the total sales are
+ if we scroll down a bit we'll see cases where we have other single null values i'll keep going until i find one here
+ for example here we have the null value for the store and that would be the face of the cube that's not constraining the store dimension
+ so that would be the sum for item and customer at any store item and customer to at any store
+ then we also have tuples that have two null values here's an example
+ so this one is going to be corresponding to the edge of the cube
+ so this is the edge of the cube that is along the store dimension and is picking out store along that dimension and then giving the total sales for all items and all customers in store and we see that
+ and again we'll see other instances where we're missing two values scroll down to get here
+ we've got one where we're missing the store in the item so this would be on the edge along the customer dimension
+ so this gives us the total sales for any store item made by customer
+ and then finally if we find it we'll find the one that's all three null values and that's right here
+ so that represents the corner of the cube
+ that gives us the total for all stores all items and all customers
+ so what we've done here by adding with_cube and again that would be the result if this query here were supported what we're getting is the contents of the data cube which are the inner parts of the cube which is what we would get without adding anything to our group by and what we saw in one of our very first queries of the demo in addition to the data on the faces the edges and the corner of the cube
+ now let's do a quick cross check
+ so this data tells us that the corner of the cube here the one with all null values is total price
+ so that should be exactly what we get if we sum up our prices without doing any grouping or aggregation so lets give that a try
+ so we merely take our sales table we sum up the total prices and we run it and indeed we get thirty three fifty
+ so now we've seen how sql can be used to effectively create the data cube
+ sometimes in olap applications it's convenient to query the cube directly
+ so people frequently create data cube say in sql using a materialized view or just by creating a table that contains the result of the data cube which is what we are going to do
+ there are even some systems that use the data cube as their basic native data model
+ so let's go ahead and take the result of our cube query and put it in a table
+ so i've just added create table cube as before our query and the one the other thing i did was add a name to the result of the aggregation attribute so that we can refer to it in the data cube
+ so p then will then be containing the sum of the price for the items inside the data cube as well as for the faces edges and corners
+ so let's go ahead and create that table and now let's look at querying the cube directly
+ so the first thing you will notice in the next few queries is that we've replaced the sales table with the cubed table so we're gonna run our queries directly on the cube and we can join the cube with the store and item tables and the customer if we needed it just as we joined the sales table because it does contain the same dimension attributes
+ what the cube gives us is pre aggregated data both for the store a customer and item combinations
+ as well as the data that has null values that is already aggregated for the faces edges and corner of the cube as we'll just see in a moment
+ so what our query is going to do is find total sales of blue items in the state of california
+ and it will start by showing the tupples that are used to get that total
+ so we'll join our cube table with the store and the item dimension tables in order to constrain the state and the color and then we will constrain the state and the color
+ notice the last thing we say is that customer id is null and that's going to give us the data on the face of the cube that doesn't go along with the customer's dimension
+ that means it's going to be pre aggregated for all customers and that's what we want since we don't care about the customers and just about the color and the state
+ so let's first run this query and we see we get six tuples and these tuples are all from the portion of the result of that cube query we ran that has a null value for customer id and that is all combinations of stores of items and if we checked our dimension tables we'd see that these stores are in california and these items are blue and these are our total sales broken down by store and item
+ finally to get the total total sales we'll just sum up our column p which remember was the sum of price in the data queue
+ so we replace c with sum of p and we run the query and we see that our total is
+ now let me show you something that may seem non intuitive at first but if you think about it or maybe run the queries yourself you'll start to understand exactly what's happening
+ i'm going to go back to c in the select clause
+ and incidentally i didn't mention it before but c gives us in the select clause all the attributes from the cube table and that is showing which tuples are being used for the aggregation
+ so we had before six tuples that were being used
+ now i'm going to make one tiny change to the query
+ instead of finding the customer ids that are null i'm going to find the customer ids that are not null
+ i'm going to run that query and i see that we have fourteen tuples now
+ what we've actually done is moved away from the face of the cube and into the cube and i've said don't give me any of the summarized data just give me the original values that are the store item and customer together
+ so i've taken away the summaries but actually this should still give me the same answer
+ let's make sure that's the case
+ i do sum of p and i run it and i get
+ so what happened here is i used what's effectively the same data but broken down by customer
+ and i added it up that was a less efficient query but both of those queries do give the correct result they do give you the total sales of california stores' blue items
+ again i encourage you to download these and run them yourself to figure out exactly what's going on
+ and as a last demonstration of this very same query we can actually go back to the sales table
+ let's say we don't even have our data cube
+ so we're gonna use our sales table instead and it should give us the same result but even less efficient than the the last query that we did
+ so you can see here i've changed the cube to be the sales and all the c dots to f dots
+ i took away the constraints on being null or not null since that's not relevant in the sales table
+ otherwise the query looks pretty much the same
+ so let's run this much and see how many tuples we are operating on now
+ so now we're operating on tuples
+ so this is the original completely broken down data
+ just as a reminder in the data cube even in the cells we'll be summarizing or summing for the combination of store item and customer
+ so if we have three tuples that are the same store item and customer those will be broken out in the sales table and summarized in the cube even in the least summarized portion of the cube if you get what i'm saying
+ so now we've got our tuples and if we sum up the price of those twenty five tuples we should get that same result and we do
+ so we saw that we had six tuples in the most efficient query over the data cube
+ when we used just a center portion of the cube we had fourteen or something i actually don't remember the exact number and then
+ all of them gave us the same answer
+ obviously these numbers are very small but if you think about huge data that has millions or tens of millions of rows then we're talking about dramatic differences in how much data needs to be summarized or aggregated in order to get the answer
+ so using the summary data from the cube can be orders of magnitude faster than going to the original fact data
+ now a variation on the width cube is to give specific attributes with the cube operator itself
+ and what that says is to only give summaries for these dimension attributes and not the others
+ in other words we'll only see null values in the result for the store id and customer id and we won't see any null values for the item id
+ so in some sense we're materializing just some of the faces edges and corner of the cube not all of them
+ if we run this query well we'll get the same results that mysql doesn't yet support it but this is the sql standard for the cube operator with subsets of attributes
+ as before i've cooked up an equivalent query using a mysql's with roll_up command and i'm certainly not going to explain it but you're welcome to download it and examine it
+ what i really like to look at is the result and here it is
+ so this looks a lot like our original data cube but what we will notice is that there are no null values in the item column
+ so it's a subset of the result of the cube query
+ and we would use that when we know we're never going to be rolling up on items
+ so that dimension the summaries based on that dimension aren't going to be useful to us
+ now let's look at with roll_up which is supported natively by the mysql system
+ with roll_up again gives us a subset of the data
+ cube
+ but it's a very specific one and it's based on the ordering of the attributes in the group by clause
+ so let me just go ahead and run it and explain what we get
+ we again get null values and those null values indicate the summary
+ for example the store item and s
+ the sum of prices for all customers for store and item
+ and we see store item as well
+ we again see cases with two null values so this is the summary for store all of the items and customers the total sales and we also have the triple null somewhere
+ it's at the bottom this time with total sales of
+ but what we'll see is that we don't have all combinations of null values
+ we have a null value for customer id or we have nulls for the combination of customer id and item id or all three nulls
+ so we only have the right hand attribute or the two most right attributes or all of them and if we had a fourth dimension we'd see that we have the right most two right most three right most
+ this doesn't really make any particular sense for this query but it's used when we have dimensions that are hierarchical
+ and i actually introduced a hierarchical dimensions in our original schema just for this purpose
+ so lets turn to that query
+ so here's a query that's grouping by the state county and city
+ these are three dimension attributes they all come from the store dimension table
+ and they are hierarchical meaning that we don't have every combination of state county and city
+ we have cities that are in specific counties and counties that are in specific states
+ so when we look at the results of the query we see of course that we when we have san_mateo is always in the state of california
+ king county is always in the state of washington
+ we don't have palo alto combined with say king county with state california
+ so we don't have all the combinations of the three
+ we have a hierarchical structure on them
+ and it's this structure that makes sense when we use a roll_up
+ so let's add with roll_up to this query and see what we get
+ so here in our result we see our original tuples for a state county city combination
+ and then we see for example this tuple here which is taking the state of california and the county of san_mateo and adding up all of the sales there
+ and we see similarly that we have all of the sales for santa_clara county
+ then we can see that we have all of the sales for each state so this is the california sales and the washington sales
+ and finally the triple null is the corner the cube it's all of our sales and as usual we get the total of
+ now what don't we see in here compared with the data cube
+ well we don't see for example a tuple that has california and palo alto and the county as null
+ why is that
+ well palo alto is always in santa_clara county
+ so rolling up the county or saying i want california and palo alto sales for every county is exactly the same as saying i want california and palo alto sales in santa_clara county
+ we also don't see for example the state and county both being null
+ for example if we had seattle as a city and the state and county being null
+ well seattle is always in king county and always in washington so we're not aggregating anything there we get the exact same results as having seattle king in washington
+ so if we ran with cube on this hierarchically structured data we'd actually not get anymore information we'd have a bigger result but it wouldn't be giving us more information
+ it would just be less efficient for getting the same data
+ so that concludes our olap demonstration
+ we saw star schema and we saw plain sql queries over that schema
+ we saw the concept of drilling down and rolling up also slicing and dicing
+ we introduced a with cube extension to sql which is not yet implemented in mysql but we were able to write a query that's equivalent to with cube
+ we also saw putting a with cube query into a table and then querying that table directly and that can be much more efficient than running the equivalent query in sql directly over the fact table
+ we also saw with rollup which is implemented
+ we didn't demonstrate putting the result of with rollup in a table but we could certainly do that too
+ all of these features are useful primarily in applications that are performing analyses over very large data sets that exhibit this dimensional type structure but this is actually quite a common structure in analysis applications

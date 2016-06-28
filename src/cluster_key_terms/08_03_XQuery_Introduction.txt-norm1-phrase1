@@ -1,0 +1,57 @@
+ this video gives an introduction to the xquery query language for xml
+ as a reminder querying xml is not nearly as mature as querying relational databases
+ it's much newer
+ and there is no clean underlying algebra that is equivalent to the relational algebra
+ the sequence of development of xml querying which is started with xpath which we've already covered
+ then access lt which we'll be covering later and in this video and the subsequent demo we'll be covering the xquery language
+ xquery is an expression language also known as a compositional language
+ and we've seen that already with relational algebra
+ what that means is when we run an expression of the language on a type of data the answer to that expression or query is the same type of data
+ so let me just draw the picture here
+ we have some data
+ we run an expression or query over that data and we get get a result back and that result is also going to be in the same type of data
+ that means we can run another query or expression over the same type of data that was the result of the previous one
+ and again we'll again we get a result of the same type of data
+ now that also means that we can sort of put these together and when we put them together that will give us additional expressions or queries that are valid in the language
+ when we talked about compositionality in the relational model the types of data we were using were relations
+ we would have maybe some relations here we run a query over those relations the result itself is a relation and we can run further queries over that relation that's the answer
+ and then when we looked at relational algebra we saw a composing the expressions of relational algebra into more complicated expressions and everything worked together
+ in xml it's similar except the expressions operate on and return what are known as sequences of elements
+ now we're not going to go into a great detail of this model
+ as we mentioned for xpath the sequences of elements can be generated from an xml document they can also be generated from an xml stream and the interpretation is quite natural
+ now let me mention that one of the basic types of expressions in xquery is xpath
+ so every xpath expression is in fact an xquery expression or a valid query in xquery
+ then we can use xpath and other constructs of xquery to put together into more complicated queries
+ now one of the most commonly used expressions in xquery is what's known as the flwor expression and it looks closest to sql of any of the constructs in xquery
+ let me explain how it works
+ we have up to five clauses in that flwor expression and that's where the flwor comes from
+ the first the for clause sets up what are known as iterator variables
+ so the idea here is that in the for clause this expression is evaluated and it will produce potentially a set result
+ and then the variable will be backed count to each element of the set one at a time and then the rest of the expression will be evaluated for each element
+ so in other words if this produces a set of end results
+ then we will effectively evaluate the rest of the queries n times
+ we will see that much more clearly when we do the demonstration
+ the let clause is more of a typical assignment
+ so it's only run once each time the rest of the query is run
+ and so this expression is evaluated and even if it's a set it's assigned once to this variable
+ so it's not iterating now it's just doing an assignment
+ again it'll become quite clear when we do the demonstration
+ the where clause specifies a condition and it's a filter very similar to the filters that we've seen in sql
+ the order by is also sort of similar to sql
+ it sorts the results so that you can get the result in a particular order
+ and finally the return clause says what we want to actually get in the result of our query
+ and just as a reminder when we start the query with the for if we are effectively executing the query n times then each one of those n executions may result in one of the elements in the result
+ the flwor expression has up to five clauses but actually all of the clauses except the return clause are optional
+ the return is the only one that's required to have a well formed query and to get a result
+ i also want to mention that the for and let clause can be repeated multiple times if we want to set up multiple variables or multiple assignments and they can be interleaved with each other
+ they don't need to be in a particular order
+ a next query it's possible to mix query evaluation with simply writing down the xml data that we want in the result
+ and here's an example
+ in this case we're writing the opening and closing tags that we want to be in the result of our query
+ and then inside curly braces we write the query itself
+ and what these curly braces effectively say are evaluate me
+ the curly braces are an indicator to the xquery processor that what's inside them needs to be run as a query is replaced with the xml that's the query result and the final output is our opening and closing tags with the xml query result inside
+ at this point let's move ahead to the demo
+ we'll once again be using our bookstore data and we'll do a sequence of xquery examples over that data
+ again we are not going to be comprehensive
+ xquery is a big language but will show the flavor of the language and a lot of its most useful constructs and we'll be able to write some quite powerful queries

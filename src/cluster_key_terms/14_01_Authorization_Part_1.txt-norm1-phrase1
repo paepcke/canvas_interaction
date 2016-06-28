@@ -1,0 +1,30 @@
+ this video covers database authorization
+ as we'll see its a relatively straight forward topic but it is a very important one
+ authorization has to do with first making sure that users only see the data that they're supposed to see
+ and second guarding the database from being modified by malicious users
+ now one thing that we're not covering in this video are system or programming security issues such as sql injection errors what we are focusing on is security of the data access itself
+ so the way database authorization work is that users of the database have specific privileges and then they can only operate on data for which they're authorized through those privileges
+ so it's similar to file system for example privileges and authorization except that it is specific to the database constructs database contents and tends to be more fine grained access than we see with file systems
+ specifically for databases that privileges that are possible are on a particular relation to select the data for that relation or maybe just select the specific attributes so that's read privileges
+ as far as write privileges or modifications we can set up the privilege to insert a non relation or even insert specific attributesonly of a relation
+ most sql implementations do allow you to insert data with only specific attributes specified
+ we can have privileges to update a relation or update specific attributes and finally the privilege to delete from a relation
+ so let's go straight to some examples
+ we'll be using the standard college admission sample database that we've used in other videos
+ the schema is shown here at the bottom
+ let's suppose we have a user who wants to issue the update command shown
+ they want to find students whose gpa is greater than and if those students have applied anywhere they want to update the application record and set the decision to be yes
+ so let's look at what privileges would be needed by the user to execute this command
+ so clearly we're going to have to have some privileges on the apply relation and some privileges on the student relation
+ in the apply relation they're going to need to be able to update the decision attribute but there's no other update privileges that are needed
+ in terms of select privileges or reading the apply relation the only attribute that's being read here is the student id so that's what they need for the student relation they're going to need to read the gpa as well as the student id so the privilege needed there is the select privilege over the student id and the gpa
+ so with this set of privileges the user would be allowed to execute this operation
+ in our next example suppose the user wants to delete all students who haven't applied anywhere
+ so they're deleting from the student relation where the student id is not in the set of student ids in the applied relation
+ so for this one again they'll need privileges on the student relation and on the apply relation
+ on the student relation the user would need the delete privilege and delete never has attributes associated with it because you are always deleting entire tuples
+ the only tuple that's actually the only attribute that's actually being read from the student relation is the student id
+ so the user would also need the select privilege on student id
+ and then in the applied a relation again only the student id is being read
+ so the user would need the select privilege on apply of the student id
+ and with these the user will be permitted to execute this operation

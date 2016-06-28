@@ -1,0 +1,144 @@
+ this video introduces online analytical processing or olap
+ a subsequent video will have a demo of olap queries in action
+ overall database activity can be divided into two broad classes
+ one of them the traditional one is known as oltp or online transaction processing
+ the other one the subject of this video came about more recently and it's known as olap or online analytical processing
+ online transaction processing is typically characterized by short transactions both queries and updates
+ things like updating an account balance in a bank database or logging a page view in a web application
+ queries in oltp data bases are generally fairly simple
+ find an account balance or find the gpa of a student
+ they typically touch small portions of the data
+ and updates in this environment can be frequent
+ we might be making airline seat reservations or updating a online shopping cart
+ olap is pretty much the opposite in all respects
+ in olap we have long transactions often complex analysis of the data or data mining type operations
+ the queries as i said can be complex and especially they often touch large portions of the data rather than small portions as in oltp
+ and updates in the olap environment tend to be infrequent in fact sometimes in the olap environment there are no updates to the data at all
+ now these two are extremes and really there is a spectrum between those two extremes
+ we might have a sort of moderate amount of update and queries that touch a moderate portion of the data
+ but the fact is that database systems traditionally were designed for the first extreme
+ and then special techniques were developed for the other extreme
+ so the systems are tuned for the two extremes
+ and depending on ones work load one might choose to use different options in a database system just a little bit more terminology in the olap world
+ there's a concept called data warehousing
+ it's really a software architecture
+ the idea is that often in enter prizes or other operation there are lots of operational sources
+ so you can think of a point of sale for example might have many many oltp database pieces related to an enterprise and data warehousing is the process of bringing the data from all of those distributed oltp sources into a single gigantic warehouse where the point then is to do analyses of the data and that would fall under the olap camp
+ another term you might encounter is decision support systems also known as dss
+ this isn't really an exact term
+ it's generally used to talk about infrastructure for again large scale data analyses
+ so if you think of a data warehouse where we're bringing in a lot of data from operational sources and that warehouse is tuned for olap queries that would be thought of as a decision support system
+ and of course this system is designed to support decisions that are made again based on data analysis
+ now let's get into some technical details of olap
+ frequently applications that are doing online analytical processing are designed based around a star schema so it's a certain type of relational schema
+ in a star schema there's usually one fact table
+ that will be a typically very large table it will be updated frequently
+ often it's actually append only so there are only inserts into the fact table
+ and then there are maybe many dimension tables
+ those are updated infrequently and don't tend to be as large
+ so examples of a fact table might be sales transactions in a sales database or in a university database maybe students enrolling in courses or in a web application logging the page views
+ in all of these cases we can see that the fact table can be very large and can be append only so inserts only
+ examples of dimension tables might be in a sales database store's items and customers in a college enrollment database
+ maybe students and courses in a web application
+ maybe web pages his users and advertisers
+ so you can see that these are generally smaller tables they're more stable they're not updated as frequently
+ you can sort of think of dimension tables as things in the real world and then fact tables as logging things that happened
+ it's not always divided this way but it's not a bad approximation
+ now you might be wondering why is it called a star schema and it's called that because we have the fact table sort of centrally referencing dimension tables around it
+ so i'll draw the picture
+ let's take a particular example and let's look at the sales domain
+ so we'll have our fact table here which will be the sales table and that will log sales transactions actions
+ it will include the store where the sale was made the item that was sold the customer how many were sold and the price that was paid
+ and then the other three tables are the dimension tables
+ so those those are giving us information about the stores and the items and the customers
+ so i've drawn a picture of our schema here
+ we have our central fact table the sales table
+ and we can see that the sales table contains these three columns i've abbreviated them in the picture the store id item id and the customer id
+ the store id values in this column will be foreign key attributes to the primary key of the store table if you remember our constraints video
+ so we can think of these as pointers into the store table least specifically matching store ids over here
+ and we'll have similarly our item ids will be foreign keys to the item table
+ i won't actually point to the values here
+ and then our costumer ids over here will be pointing to the customer table
+ so if you look at this squinting you will see that it is kind of a star schema with the central fact table pointing to the dimension tables around it and that's where the name comes from
+ just a little more terminology
+ the first three attributes here in the fact fact table
+ these three are what are known as dimension attributes
+ so those are the attributes that are foreign keys into the dimension tables
+ then the remaining attributes in this case the quantity and the price are called dependent attributes
+ so they're i guess dependent on the values for the dimension attributes and typically queries will tend to aggregate on the dependent attributes
+ we'll see examples of that in a moment
+ so now that we known what a star schema looks like let's look at the type of queries that are generally issued over this schema and they're called olap queries
+ typically a query over a star schema will first join some or all of the relations
+ and when you're joining the sale as the fact table with the dimension tables you can almost think of it as expanding the facts in the sales table to include more information about the sales
+ since we have the foreign keys we'll be adding for example to the information about a sale
+ more about the store
+ the city and state of the store
+ for a sale item will be adding the category brand and so on
+ so that's the join process and the query will join as much as it needs in order to do the rest of it's work
+ it might then filter the data
+ for example we might decide that in our query we only care about stores in california or customers in california we're only interested in shirts and so on
+ so they can filter on the dimension attributes after joining or could filter on the price or quantity as well
+ after filtering there's often a group by an aggregation
+ so we might decide that we're interested in figuring out our total sales divided by customer or by item or by state or all of those
+ and then the aggregation might sum up the sales or it might determine the average price that's sold
+ we'll be doing a number of this type of query in our demo later on
+ so if you think about executing queries of this type they can be quite complex and they can touch large portions of the database
+ sowe 're worried about performance and our data is large we do have a worry
+ running this type of query on a gigantic database over a standard database system can be very slow but over the past decade or so special indexing techniques have been introduced and special query processing techniques specifically to handle this type of query on star schemas on large databases
+ and again by large just think about the number of sales for example in a large retail chain or a number of web views or even shopping cart additions in a large online vendor
+ so in all of those applications people are interested in doing olap queries and they tend to use a system that supports these special techniques
+ another component of getting good performance in these systems is the use of materialized views
+ you might remember that materialized views are useful when we have a workload that consists of lots of queries and not so many updates
+ and that's exactly the type of workload we have in olap
+ furthermore we have many queries that take roughly the same structure so material wise we use are useful in that setting as well
+ now let me switch gears and introduce a different way of looking at the data in these olap applications with star schemas and it's what's known as a data cube
+ sometimes this is also called multidimensional olap and the basic idea is that when we have data with dimensions we can think of those dimensions as forming the axis of a cube
+ it's kind of like an n dimensional spreadsheet
+ now we can have any number of dimensions but for the examples i'm gonna give the best i can draw is up to three dimensions and that's why people call acute
+ because they know how to draw three dimensions
+ but again any number of dimensions are possible in this view of the data
+ so we have our dimensions forming the axis of our cube
+ and then the cells of the cube again you can think of it sort of like cells of a spreadsheet
+ are the fact of data
+ or the dependent data
+ it's like in the previous example that would be our quantity and price
+ and finally we have aggregated data on the sides edges and corners of corner of the cube
+ again similar to how you might aggregate columns in a spreadsheet
+ so let's go ahead and i'll do my best to draw a picture to explain what's going on
+ so here's my cube with these three axes that i've drawn in black
+ and i've drawn these dash lines as well to sort of give you a visual idea of the cube
+ but i'm going to actually get rid of these dash lines right now just so we don't have too much clutter
+ so for our sales example we're sticking with the same example we have dimensions
+ and those will label the three the three axises of are cube and in one dimension we will have the stores and another dimension we will have the customers here and in another dimension we have the items
+ then we can think of the points along these axes as being the different elements in each of those domains or the different tuples in each of those dimension tables
+ so for example in the store domain we'll have you know store store store and so on
+ i'm not giving them any fancy names here
+ and so each of those is a point on that dimension and similarly for the items will have item item item and so on
+ and for the customers along the bottom we'll have customer customer number customer and so on
+ now here comes the tricky part especially for drawing
+ the idea is is that every cell in the cube so every combination of item costumer in store has a cell in the cube so this would be sort of a free floating cell here
+ and this will have for our schema the quantity and the price for that item that customer and that store
+ so this might be the floating thing here that's you know item i costumer and store something like that
+ and then floating in there is this cell with the quantity and the price
+ now we are assuming that there's just one quantity and price for the combination of those three attributes
+ and i'll come back to that in a moment but let's assume that for now
+ so that's what we have in the whole central area of the cube
+ so now on the faces edges and corner of the cube are going to have aggregated data
+ and there does need to be with each data cube a predefined aggregate
+ so for this one let's say that what we want as our aggregate is the sum of the quantity times the price so we're going to figure out the total amount that we're making for different combinations of stores items and customers
+ so now let's consider a cell on the face of the cube
+ so again i'm not drawing this very well
+ but let's assume this is on the bottom face of the cube
+ so this is for a particular customer
+ say customer in a particular store say store and then since it's on the bottom of the cube so we didn't go up this dimension here it considers all items for customer and store
+ so this will be the aggregate over all items for that particular store and customer
+ and we'd have similar values on the other faces of the cube
+ so this face over here for example would be for a particular item and customer overall stores
+ and then on the front face of the cube if you could imagine that would be for a particular item and store over all customers
+ now let's talk about what's on the edge of the cube
+ so here we have say for store we'll have the aggregate value over all customers and items in this point for store
+ so that will be the total sales that we conducted at store s
+ over here on this edge we'd have the total for a specific costumer and over here for specific items
+ and then finally we have at the corner of the cube the full aggregation
+ so that's going to be in this case the sum of the quantity times price for every store customer and item
+ so i'm not a great artist but i hope this gives you some understanding of how the data cube works

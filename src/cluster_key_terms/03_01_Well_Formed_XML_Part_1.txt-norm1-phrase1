@@ -1,0 +1,111 @@
+ this video introduces the basics of xml
+ xml can be thought of as a data model an alternative to the relational model for structuring data
+ in addition to introducing xml we will compare it to the relational model although it is not critical to have watched the relational model videos in order to get something out of this one
+ the full name of xml is the extensible markup language
+ xml is a standard for data representation and exchange and it was designed initially for exchanging information on the internet
+ now don't worry if you can't read the little snippet in the corner of the video here
+ you're not expected to at this point
+ xml can be thought of as a document format similar to html if you're familiar with html
+ most people are
+ the big difference is that the tags in an html document describe the content of the data rather than how to format the data which is what the tags in html tend to represent
+ xml also has a streaming format or a streaming standard and that's typically for the use of xml in programs for admitting xml and consuming xml
+ so now let's take a look at the xml data itself
+ you see on the left side of the video a portion of an xml document
+ the entire document is available from the website for the course
+ xml has three basic components
+ again fairly similar to html
+ the first is tagged element
+ so for example let's take a look at this element here
+ this is an element saying that the data here is a first name
+ so we have a opening tag and we have a matching closing tag
+ we also have nesting development
+ so for example here we have an element that's authored
+ we have the opening tag here the closing tag here and we have a nesting of the first name and last name elements
+ even larger we have a book element here with opening and closing tags with a nesting of numerous elements inside and the entire document actually is one element whose opening tag is bookstore and the closing tag isn't visible on the video here
+ so that's what elements consist of an opening tag text or other sub elements and a closing tag
+ in addition we have have attributes so each element may have within its opening tag and let's take a look at the book element here
+ a set of attributes and an attribute consists of an attribute name the equal sign and then an attribute value
+ so our book element right here has three attributes
+ one called ispn one called price and one called edition
+ and any element can have any number of attributes as long as the attribute names are unique
+ and finally the third component of xml is the text itself which is depicted here in black
+ so within elements we can have strengths
+ we have a strength all right here we have a title here here we have a remark
+ and so that's generally sort of think of xml as a tree the strings form or the text form the leaf element of the tree
+ so again those are the three major components of xml
+ look's a lot like html except the tags are describing the content of the data and not how to format it
+ now let's spend some time comparing the relational model against xml
+ again it's not critical that you learn about the relational model and you can skip this material if you're not interested but in many cases when designing an application that's dealing with data you might have to make a decision whether you want to use a relational database or whether you want to store the data in xml
+ so let's look at a few different aspects of the data and how it's used and how it compares between relational and xml
+ let's start with the structure of the data itself
+ so as we learn the structure in a relational model is basically a set of tables
+ so we define the set of columns and we have a set of rows
+ xml is generally again it's usually in a document or a string format but if you think about the structure itself the structure is hierarchical
+ the nested elements induce a hierarchy or a tree
+ there are constructs that actually allow us to have links within documents and so you can also have xml representing a graph though in general it's mostly thought of as a tree structure
+ next let's talk about schemas
+ in the relational model the schema is very important
+ you fix your schema in advance when you design your database and them you add the data to conform to the schema
+ now in xml you have a lot more flexibility
+ so the schema is flexible
+ in fact a lot of people refer to xml as self describing
+ in other words the schema and the data kind of mixed together
+ the tags on elements are telling you the kind of data you'll have and you can have a lot of irregularity
+ now i will say that their are many mechanisms for introducing schemas into xml but they're not required
+ in the relational model schemas are absolutely required
+ in xml they're more optional
+ in particular let's go back and take a look at our example and we'll see that we have sort of some structure in our example but not everything is perfectly structured as it would be in the model
+ so coming back here and taking a look first of all we have the situation where in this first book we have an attribute called edition the third edition
+ whereas in the second book we only have two attributes so there's no addition in this book
+ now in the relational model we would have to have a column for addition and we have one for every book
+ although of course we could have null editions for some books
+ in xml it's perfectly acceptable to have some attributes for some elements and those attributes don't appear in other elements
+ here's another example where we have a component in one book that's not in another and it's this remark component
+ so here we have a book where we happen to have a remark and incidentally you can see that this book suggests this remark suggests that we buy the complete book together with the first course
+ the first course is a subset so it's not a very good suggestion although amazon actually did make that one
+ anyway enough of the asides
+ we do see that we have remark for the first book and we have no remark for the second book and that's not a problem whatsoever in xml
+ in the relational model we would again have to use null values for that case
+ and the third example i just wanted to give is the number of authors
+ so this first book has two authors
+ the second book you can't see them all but it has three authors
+ not a problem in xml
+ having different numbers of things is perfectly standard
+ so the main point being that there's a lot of flexibility in xml in terms of the schema
+ you can create your database with certain types of elements later add more elements remove elements introduce inconsistencies in the structure and it's not a problem
+ and again i'll mention one more time that there are mechanisms for adding schema like elements to xml or schema like specifications to xml
+ we will be covering those in the next two videos actually
+ next let's talk about how this data is queried
+ so for the relational model we have relational algebra
+ we have sql
+ these are pretty simple nice languages i would say
+ it's a little bit of a matter of opinion but i'm going to give them a smiley face
+ xml querying is a little trickier
+ now one of the factors here is that xml is a lot newer than the relational model and querying xml is still settling down to some extent
+ but i'm just gonna say it's a little less so i'm gonna give it a neutral face here in terms of how simple and nice the languages are for querying xml and we'll be spending some time in later videos learning some of those languages
+ next in our chart is the aspect of ordering
+ so the relational model is fundamentally an unordered model and that can actually be considered a bad thing to some extent
+ sometimes in data applications it's nice to have ordering
+ we learned the order by clause in sql and that's a way to get order in query results
+ but fundamentally the data in our table in our relationship database is a set of data without an ordering within that set
+ now in xml we do have i would say an implied ordering
+ so xml as i said can be thought of as either a document model or a stream model
+ and either case just the nature of the xml being laid out in a document as we have here or being in a stream induces an order
+ very specifically let's take a look at the authors here
+ so here we have two authors and these authors are in an order in the document
+ if we put those authors in a relational database there would be no order
+ they could come out in either order unless we did a order by clause in our query whereas in xml implied by the document structure is an order
+ and there's an order between these two books as well
+ sometimes that order is meaningful sometimes it's not
+ but it is available to be used in an application
+ lastly let's talk about implementation
+ as i mentioned in earlier videos the relational model has been around for as least years and the systems that implement it have been around almost as long
+ they're very mature systems
+ they implement the relational model as the native model of the systems and they're widely used
+ things with xml are a little bit different partly again because xml hasn't been around as long
+ but what's happening right now in terms of xml and conventional database systems is xml is typically an add on
+ so in most systems xml will be a layer over the relational database system
+ you can enter data in xml you can query data in xml
+ it will be translated to a relational implementation
+ that's not necessarily a bad thing
+ and it does allow you to combine relational data and xml in a single system sometimes even in a single query but it's not the native model of the system itself

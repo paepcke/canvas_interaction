@@ -1,0 +1,80 @@
+ this video talks about indexes
+ it's actually a relatively short video about a very important topic
+ before i get started however let me mention that indexes are also sometimes prefer two as indices those are equivalent
+ i personally prefer using the term indexes
+ the reason indexes are so important is that they are the primary way of getting improved performance out of a database
+ indexes are a persistent data structure
+ they're stored together with the database itself
+ now there are many very interesting implementation issues in indexes but in this video and in this course in general we're focusing on the perspective of the user and application
+ so we'll talk about how applications will use indexes to speed up performance
+ so let's suppose we have a very simple table t that has three columns but we're going to focus on columns a and columns b
+ and we can see that column a is a string valued column with animal names and column b is an integer column
+ now we're gonna be asking queries that involve conditions over these two columns
+ in order to speed up those queries if we're concerned about evaluating conditions on column a then we can build an index on that column
+ so we call that an index on column t a
+ what that index allows us to do and us in this case is actually the query processor is ask questions for example let's ask what tuples have cow in the value of t a
+ if we ask that question of our index that that index will quickly tell us that tuple and tuple have a value cow without scanning the entire table
+ we could also ask the index what tuples have say value cat
+ and if we ask the index that question it will tell us tuple and tuple and tuple have the value cat
+ if we're interested in evaluating conditions in column b then we can also build an index on column b
+ for example now we could ask questions like when is t b equal to the value two
+ we asked the index and the index will tell us that tuple and tuple have the value two
+ we could also ask for example when the value in t b is less than six
+ and the index in that case would tell us that tuple is less than six two wow most of them three five and seven
+ we could ask an even more complicated question
+ we could ask when the value for t b is say greater than four and less than or equal to eight
+ again we ask the index and in this case the index would tell us that it is tuple two and tuple seven in that case
+ lastly suppose we're interested in having conditions that are on both columns a and b
+ then we can build an index that is on both columns together
+ now we could ask questions for example like when is t a equal to cat and t b say greater than five
+ do we have any of those
+ well we have just one of them there
+ that's tuple six
+ we could also have inequalities by the way on the first column
+ so we might ask when is t a less than say the value d and t b equal to say the value and in that case we'll get the tuple as a result
+ so i think this gives an idea with a simple table of how indexes are used to go directly to the tuples that satisfy conditions rather than scanning the entire table
+ so that's the main utility of an index
+ again the tables can be absolutely gigantic in databases and the difference between scanning an entire table to find that tuples that match a condition and locating the tuples more or less immediately using an index can be orders of magnitude in performance difference
+ so really it's quite important to take a look at the database and build indexes on those attributes that are going to be used frequently in conditions especially conditions that are very selective
+ now i mentioned that we're not covering the implementation of indexes in this video but it is important to understand the basic data structures that are used
+ specifically there are two different structures
+ one of them is balance trees and substantiation of that is typically what's called a b tree or a b tree
+ and the other is hash tables
+ now balance trees indexes can be used to help with conditions of the form attribute equals value
+ they can also be used for attribute less than value for attribute between two values and so on as we have shown earlier
+ hash tables on the other hand can only be used for equality conditions
+ so only attribute equal value
+ and if you're familiar with these structures then you'll know why there's the limit on hash tables
+ so balanced tree indexes are certainly more flexible
+ now there is one small downside
+ for those of you who are familiar with the structures and with the running time the operations on the balance trees tend to be logarithmic in their running time while well designed hash tables can have more or less constant running time
+ even in large databases logarithmic is okay although when only equality conditions are being used then a hash table index might be preferred
+ now let's take a look at a few sql queries and see how indexes might allow the query execution engine to speed up processing
+ we'll use our usual student and college database
+ the first one is a very simple query it's looking for the student with a particular student id
+ so if we have an index on the student id then again the index will allow the query execution engine to go pretty much straight to that tuple whereas without an index the entire student table would have to be scanned
+ now let me mention that many database systems do automatically build indexes on primary keys
+ so it's likely that in an application the student id would be declared as a primary key and there would be an index automatically
+ but it's a good thing to check if this type of query is common
+ and some systems even also build indexes automatically on attributes that are declared as unique
+ as a reminder from the constraint video every table can have one primary key and then any number of additional keys labeled as unique
+ now let's take a look at a slightly more complicated example
+ here we're looking for students whose name is mary and whose gpa is greater then and there may be a few of those students
+ so one possibility is that we have an index on the student name and if that is the case expand the query processing can find quickly the tuples whose student name is mary and then check each one of those to see if the gpa is greater than
+ alternatively we might have an index on the gpa
+ in that case the system will use the index to find the students whose gpa is greater than and then look to see if their name is mary
+ finally it is possible we can have an index on the two attributes together so we can have s name and gpa together and then this index can be used to simultaneously find students that have the name mary and the gpa greater than
+ now i should mention that because this is an inequality condition it is important that the gpa is a tree based index in order to support that evaluation of this condition where the student name is an equality condition so that could be a hash based index or a tree based index
+ now let's look at a query that involves a joint
+ we're joining the student and apply tables in order to find the names of the colleges that each student has applied to
+ and we're returning the student name and the college name
+ so let's suppose for starters that we had an index on the student id attribute of the apply relation
+ if that's the case then the query execution engine can scan the student relation and for each student use that sid and quickly find the matching sids in the apply relation
+ alternatively let's suppose we had an index on the sid attribute of the student relation
+ in that case the system could scan the apply relation and for each student id and each apply tuple find the matching student ids in the student tuple using the index that we have there
+ in some cases it's actually possible to use the two indexes together and make the query run even faster
+ i'm not going to go into detail but indexes often allow relations to be accessed in sorted order of the indexed attributes
+ so suppose we can get the student relation in sorted order and the apply relation in sorted order
+ then we can kind of do a merge like operation of the two indexes to get the matching student and apply records those whose sids are equal
+ if we had additional conditions in the query there might be even more choices of how to use indexes and that gets into the entire area of what is known as query planning and query optimization
+ and this is actually one of the most exciting and interesting areas of the implementation of database systems and is what allows us to have of a declarative query language that's implemented efficiently

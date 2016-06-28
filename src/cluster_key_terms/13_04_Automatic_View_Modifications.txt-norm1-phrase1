@@ -1,0 +1,222 @@
+ this video will be a demo of automatic view modifications
+ as a reminder when we've defined a view called v we'd like to issue modification commands against v as if it were any table
+ since v is just a logical concept and not a stored table the modifications have to be rewritten to modify the base tables over which v is defined
+ we saw in an earlier video that unlike queries overviews modifications overviews cannot be automated in the general case
+ we've discussed that there are two different strategies to dealing with modifications to views and specifically how they're rewritten to modify base tables
+ one is to have the rewriting process specified explicitly when a view is created
+ the other possibility is to restrict the allowed view definitions and modifications over those views so that the translation can be automatic
+ the second strategy is the topic of this video
+ now in the sql_standard there is a definition for restrictions to views and modifications for what are known as updatable views
+ the restrictions are on the definitions and they apply to inserts deletes and updates all together
+ what i mean by that is that a view is either updatable or it's not
+ the sql_standard specifies four restrictions
+ the first one says that the view must be defined as a select statement on a single table t that means it cannot be a joining view
+ second of all when their attributes from t that are not in the view in other words they're attributes that don't appear in the select clause of the view those attributes of the table t must be allowed to be null or they must have a default value defined for them
+ third sub queries in the view must not refer to the table t but sub queries are allowed to refer to other tables and finally the view is not allowed to have group by or aggregation
+ in our demo we use our standard simple college admissions database with a college table student table and apply table
+ we have as usual our four colleges our bunch of students and our students applying to colleges for a particular major
+ i wanted to mention that this demo is being run in the mysql system
+ mysql among the three systems we're using is the only one that allows automatic view modifications
+ sqlite and postgres both support view modifications through triggers or rules as we saw in our other video
+ the views in this demo may look familiar there are more of the same views that we used in the original video on defining and using views
+ for example our first view is the cs accept view that finds students ids and college names where the student has applied to major in cs at that college and the decision was yes
+ we'll go_ahead and create the view and then take a look at the contents of the view and we see that we have a few students here
+ now let's say we want to delete student id from the view
+ so we would delete the first two tuples of the view
+ so here's the command that says the delete from the view where the student id is
+ because our view definition satisfies the requirements for an updatable view in the mysql system we can simply run the command and the system will take care of modifying the underlying base table so that we get the effect of this deletion
+ so lets go take a look at our view
+ and we'll see that are indeed gone and if we look at our apply table we see that tuples where has applied to cs are deleted as well
+ so the system automatically translated the delete command over the view into delete commands on the base table with the proper effect
+ at this point let me mention that mysql is actually a little bit more generous about the views and modifications that it allows than the sql standard requires and we'll see some examples later that make that very clear
+ now let's take a look at insertions into views
+ we'll create our view called csee that contains the id college name and major of students who have applied in major in either cs or ee
+ we'll create the view take a quick look at it and we'll see that we have quite a few students
+ now let's suppose that we want to insert a student into csee
+ the student with id applying to berkeley for a cs
+ so we'll go_ahead and execute the command and again because we have automatic view translation the system will translate that into an appropriate underlying insertion into a base table
+ let's first take a look at the view and we'll see that we have indeed berkeley cs and then we can take a look at the apply table and we will see that the system apply inserted the corresponding tuple into apply with a null value
+ of course let me remind you no insertions happening to the view
+ the view is really just a logical concept
+ so when we take a look at the contents view we're actually running a query over the apply table
+ we by the way being the system
+ it takes care of that for us
+ now let's see a couple of examples where things seem to go wrong but don't worry we'll see a fix to them afterward
+ let's suppose that we want to insert into our csee view not aacs or ee major but a psychology major
+ so we'll insert student to apply to berkeley in psychology
+ we'll run the insertion and it seems to have worked fine so let's see what happens
+ well we look at csee and obviously the student is not there because they're majoring in psychology
+ if we take a look at the apply relation we'll see that there was in fact an insertion
+ so this doesn't look good because we don't want the system to automatically be inserting data into the base tables that isn't appearing in the view and what we wanted was an insertion into the view
+ let's see a second example of this form
+ we'll go back to our accept view which is students and colleges where the student applied to a cs and the decision was yes
+ and as a reminder here's what we have
+ a few tuples of the student id and the college name
+ so let's say we wanted to insert into cs accept the value berkeley
+ so we would want that tuple in cs accept based on the definition of cs accept
+ we ought to know that we could actually insert into the apply relation the two values that were specified here along with cs and yes because this is the only two missing values in the apply relation
+ let's go_ahead and execute the insertion and see what happened
+ we go to our view manager we look at cs accept there's no sign of but let's take a look at apply and we see that the system actually did apply did insert berkeley into the apply relation that's the translation but it wasn't smart enough to put cs and yes in here so again we have a kind of disappearing insertion
+ not really what we want to happen when we try to insert into the view
+ so i mentioned that we do have a fix for that
+ we can add to our view definitions something called with check_option
+ and let's call this cs accept two
+ when we add with check_option when the system automatically preforms a translation it actually checks to make sure that the translation properly inserted the data into the view
+ so let's go_ahead and create this view and then let's perform our insertion again
+ so let's try inserting a tuple into cs accept two the version of the view with the check_option and we get an error because the system will detect that the translated insertion into the apply relation would not produce a tuple that appears in the view
+ we can similarly create a corrected version of our csee view where we add the check_option
+ we'll call it it csee
+ now let's try two inserts into csee one where the student is majoring in psychology and that should generate an error and one where the student is majoring in cs and that should be an okay insertion
+ we'll go_ahead and execute there as we see where the first one generated an error and the second didn't so to go_ahead now and take a look at csee and we'll see that student is in that view and actually that student is also going to be in the csee view because the result of the correct insertion was the insertion of student into the apply table underneath
+ now let's take a look at a few views that aren't allowed to be modified
+ the first one finds the average gpa of students based on their high_school size
+ so let's go_ahead and create the view
+ we'll take a look at it
+ and we'll see that it contains for each high_school size the average gpa of students who attended this high_school of that size
+ now let's suppose that we decide we want to delete from that view the tuples where the high_school size is less than five hundred
+ we go_ahead and run that and we see that it's not updatable according to our system
+ and if you think about it it really doesn't make sense to try to delete tuple from this view because what would you delete
+ i suppose you could delete all the students who went to a high_school of that size but that doesn't seem to be what the user would probably be intending to happen
+ similarly we could try to insert a tuple into high_school gpa and again we'll get an error and again it just doesn't make since
+ how would we insert a tuple with an average gpa
+ what students would we insert
+ some fabricated students from small high schools
+ just again doesn't make a lot of sense so the system disallows those updates
+ so the previous example wasn't updatable primarily due to the aggregation
+ here's another example that also is not updatable
+ here we're taking just the majors from the apply relation generating a list of them
+ so let's take a look at what the view would contain and we see it's again a list of majors
+ we have a student here with a null major
+ now would it make sense to insert or delete from this view
+ well inserting certainly not
+ we'd have to fabricate the student who's applying to that major
+ deleting could make more sense if we wanted to delete all the apply tuples for a particular major but probably that's not what the user intended
+ so if we try to for example add a chemistry major we would get an error
+ and if we decided for example to delete cs major we'd again get an error
+ so this view is considered non updatable by the underlying sql system and by the this is my sql that we're running but also by the sql_standard
+ so one of the other conditions we saw for a view to be update able is that it doesn't have a use of the outer relation also in a sub query
+ and so i've created a view here that violates that constraint
+ this says let's find students where some other student has the same gpa and the same high_school size and we'll call that view non unique
+ so we've got the student in the outer query the student in the inner query we'll go_ahead and create the view
+ we can take a look at the view and here we'll see that we have three students where some other student has the same gpa and high_school size and they're all the same gpa and high_school size it turns out in our small database and let's think about it
+ would it make sense to be able to modify this view
+ well if we wanted to for example delete the two amy tuples the underlying system could delete the amys that would actually have the effect of deleting doris if you think about it or they could delete the first amy and doris and that would delete the other amy
+ so there's quite a few underlying modifications that could perform the modification we're trying to perform by the way here's that modification
+ so if we try to run the delete command and it takes the amy's out of the view
+ again it's not allowed that's because there's no obvious translation
+ there's many possible translations in the underlying base tables and again the sql_standard disallows subqueries referencing the same table as the outer query because of the ambiguity of modifications on this type of view
+ now that's not to say that subqueries aren't allowed at all in views that can be modified and here's an example where we have a subquery and the view is allowed to be modified
+ this is a view of all the information about students when the student has applied somewhere for a major that's like the major that's a biology major so we're using a sql like predicate here to match the major
+ so let's go_ahead and create the view
+ we'll take a look at it and we'll see here that we have three students who have applied to some biology type major
+ let's say that we wanted to delete the first tuple from the view the tuple with the student name bob
+ so we wanted to run this command here
+ if we take a look at the view definition we can see that what would make sense here because we are selecting students is to actually delete the student tuple for bob and that is what the system will do
+ there would be other possibilities like deleting the apply tuple so there is ambiguity here but the decision in the mysql system and in the sql_standard is that if you have an outer query that's referencing a single table which is a requirement in the sql_standard then a deletion from the view is going to result in a deletion from that one table
+ so we'll go_ahead and we'll run the delete
+ we see that it happened
+ we'll take a look at bio we'll see that the first tuple is gone but what's most important is to take a look at the student table and we'll see that bob is gone from the student table
+ now it is the fact that bob's apply tupple actually is still present
+ bob was id applying to berkeley in biology
+ if we have set up our database properly we'd probably have a referential and integrity constraint from apply to student
+ and then the deletion to student would have either generated an error or generated a cascaded delete
+ but we didn't set up those referential integrity constraints in this demo so only the student tuple for bob was deleted as a result of the view modification command
+ now coming back to our bio view
+ what if we decided we actually wanted to perfrom an insertion into the view
+ let's take a look at what we have and let's suppose we want to insert another student who is applying to biology but remember the view is defined over the here we go i'm sorry over the student table
+ so that will result in an insertion into the student table just like the deletion resulted in a deletion from the student table
+ so let's say we want to insert a new student karen
+ here's her information
+ and we want to insert her into the bio view
+ so let's go_ahead and run the command
+ and it seems to have been successful
+ but let's take a look at the view and there is no sign of karen
+ well why is there no sign
+ because all it did was insert a tuple into the student table
+ here we go that's the basic translation and there's no tuples for karen in the apply table
+ we certainly didn't fabricate some application to some major that matches biology so this is again an example where we can have the underlying modification not produce a tuple in the view
+ but it will effect the actual database
+ so again we can use that check_option to make sure that doesn't happen
+ we'll create a new view called bio two and this one has the check_option
+ let's go_ahead
+ and now let's see what happens when we try to insert into bio so we'll insert another tuple and this time we get a failure because this can't translate automatically into an insertion that would actually have the effect that we want on the view
+ so we saw that we could delete from the view with no problem but we can't insert into the view
+ so you might wonder why don't we always include the with check_option when we create views
+ and certainly i would say that's a pretty good idea but it will have an effect on efficiency
+ so if one can guarantee that all of the updates that are made to the view are going to have the desired effect when they are translated then the check_option can be left out but if there's any question it's a good idea to include it
+ so now let's take a look at a view that involves a join
+ this view gathers information about students who have applied to stanford
+ we can also see that in the view definition we're giving names to attributes in the view
+ if we don't specify these names explicitly as in all of our previous examples it just takes the names from the schema of the select statement defining the view
+ now that actually wouldn't be allowed in this case because we have two attributes called sid
+ so what we're going to do is we're going to call the student id that comes from the student relation sid
+ the one that comes from the apply relation we'll call aid
+ those are always going to be equal as we'll see but they are going to have some interesting effects when we modify the view
+ there will be some meaning to having two different attributes also have the student name that comes from the student table and the major that comes from the apply table
+ let's go_ahead and create the view and we'll take a look at it's contents
+ we can see that we have a set of students who have applied to stanford
+ now lets talk about burning modification commands against this view
+ lets say that we wanted to change our two students who have applied to major in cs
+ they have their names not be helen and irene but be cs major instead
+ of course we wouldn't want to do that but it's good for illustrative purposes
+ so here's the command and again we're updating through the view so we're saying update the stan view to set the student name to be cs major if they've applied to major in cs
+ we'll go_ahead and run that
+ and let's take a look at our view
+ now we see that helen and irene are no longer a helen and irene but they're rather both called cs major
+ now we'll take a look at what the update translated to
+ so we'll go take a look at our students and we'll see that what who are helen and irene are now changed to cs major
+ so how did the system know to translate that modification to the student table given that the view is defined over two tables
+ well we're updating the student name and the student name comes from the student table so the system will basically map the attributes that are being modified to the underlying table where the attribute came from and then it will perform the corresponding modification to that underlying table
+ now that approach can introduce some problems
+ let's say that we decide we're going the update the aid attribute in our view
+ if we update the aid attribute the system will translate that into a modification to the apply relation but then we'll see that the tuples will no longer properly join
+ so let's see that through an example
+ so here's our view and let's decide we'll take our first tuple and we're going to update it's aid to not be anymore but to be
+ so here's the command that does that
+ we go_ahead and run it and let's see what happened
+ in our view we refresh and we find that that tuple is gone
+ we did not get the updated to and that's because down in our apply table we have that modification and we can see it's the first tuple to be modified to be but in our student table that student is still so it's another one of these examples whereas the underlying tables were updated as a result of asking for an update to the view but we didn't get the effect on the view we wanted
+ by now you've probably figured out what we're going to do is add a check_option to our view to make sure that bad behavior can't occur
+ so here is the same view with the check_option
+ we'll call this view stan and then we'll try to do a similar update to stan that we did before we'll try to update stan to set the aid to we go_ahead and run that and as expected the check_option fails and it doesn't allow the update
+ now let's go back to our original view without the check_option and let's see if we're allowed to perform insertions into the view
+ so first let's remind ourselves of the contents of the view
+ here's what we have now
+ and i'm going to try and insert into this view a tuple and i'm just going to specify the student id and the name and let's see what happens
+ in sql when i insert a tuple if i only want to specify some of the attributes i can list them in the insertion command give volumes for those and then we will put null for the other values
+ so lets see if the system allows us to insert into stan
+ well it seemed to
+ and let's see what happened
+ here's our stan view
+ and we refresh and it looks like nothing happened
+ let's look underneath at our apply tuple and we don't see any s happening there
+ but if we take a look at our student tuple in fact lance did appear
+ so lets try something similar on our view that has the check_option
+ so now let's try inserting mary into the view when we have the check_option and we see that it fails in that case which we would not want presumably
+ but what if we first inserted into apply a tuple for mary applying to stanford and then we try to insert mary into the view
+ now everything looks good and let's go take a look at the view first
+ here's mary and she was properly inserted into the view applying to history at stanford and and if we take a look at student mary has been inserted there as well
+ and it's no problem having the null values here because they weren't involved in our views and those attributes are allowed to be null in the underlying tables
+ now let's try something similar with nancy
+ before we try to insert nancy into our view and again this is stan with the check_option we'll insert a tuple for nancy into the apply relation
+ but we are going to insert an application to mit not to stanford
+ so hopefully we'll get the first insertion but the check_option fails because when we try to insert nancy into the student table as a result of the view rather than the system tries to insert nancy
+ nancy will join her but not applying to stanford only applying to mit
+ and the last thing that we'll do is attempt to perform a deletion from the stanford view
+ let's say we want to delete the student with id
+ so the first tuple from the view
+ so here's our command and when we run the command we see that we get an error
+ we cannot delete from the join view
+ so the mysql system has decided not to implement deletions from joined views and in that case it's because again it's quite ambiguous how that would be translated
+ a deletion from the stan view could be achieved by deleting from the student table or from the applied table or from both and because of that ambiguity the system doesn't allow it
+ when we had a view that was defined over one table even with a sub query it was sort of more clear that a deletion from the view should delete from that outer reference table
+ that completes our demonstration of automatic view modification
+ we saw that in the mysql system when we create views and asked to write modification commands on the views depending on the type of view and the type of modification that modification may be translated automatically into a modification on the underlying base tables
+ now if we don't include the check_option sometimes that translation will result in modifications to the base tables that don't have the proper effect of modifying the view
+ if we include the check_option then the system will guarantee that the modifications it makes to the base tables do result in a modification to the view
+ mysql is a little more generous in what views it allows to be modified over what the sql_standard specifies
+ for example mysql does allow joined views with certain modifications
+ also in the sql_standard every view is either considered updatable or not
+ if a view is updatable any of the modifications can be performed on it insertions deletions or updates
+ in mysql since it's a bit more generous about what views can be modified it's also a little bit more fine grained
+ so we can have views that have certain types of updates allowed for example insertions and updates while other types might not be allowed for example deletions

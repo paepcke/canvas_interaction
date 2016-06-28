@@ -1,0 +1,103 @@
+Thank you for helping with our research project! Our hope is for you
+to create a keyword index for a set of instructional videos. The
+videos comprise an introductory course in databases. This video index
+will be analogous to the index at the end of a book.
+
+The purpose of your work is to serve as ground truth for an automated
+video indexing system we are building. Our algorithms will be tested
+using your work, which will represent the gold standard.
+
+You will work not with the videos themselves but much more efficiently
+with their 'closed caption' files. Those contain a transcript of the
+instructor's words, and look like this excerpt:
+
+    This video covers database authorization.|
+    As we'll see its a relatively straight|
+    forward topic, but it is a very important one.|
+    Authorization has to do|
+    ...
+    Authorization works as follows.|
+    The databases keeps a password table
+    ...
+    We will return to authorization later.|
+    ... <some other topic>
+    We can now add encryption to the authorization table.|
+    ...
+    
+
+You will identify keywords that would be important for a student to
+find video snippets that cover a particular concept. In transcript
+lines that contain an important word, you will copy the word over to
+the right of the vertical line. We'll call this process 'marking the
+word.'
+
+You will distinguish two cases: either a word is mentioned in passing,
+or it is mentioned in the context where the underlying concept is
+introduced in depth. In the latter case you will add an asterisk after
+copying the word to the right of the vertical bar.
+
+NOTE: once you copied a keyword in the casual case, you don't have to
+copy it again! We'll find the rest automatically. We do ask that you
+mark the places where the respective concept is discussed in depth
+multiple times if needed. But often only a single part of the video
+will go into details on a concept.
+
+Here is how the above example might look when you are done:
+
+    This video covers database authorization.|authorization
+    As we'll see its a relatively straight|
+    forward topic, but it is a very important one.|
+    Authorization has to do|
+    ...
+    Authorization works as follows.|authorization*
+    The databases keeps a password table
+    ...
+    We will return to authorization later.|
+    ... <some other topic>
+    We can now add encryption to the authorization table.|authorization*
+    ...
+
+Notice the first mention of authorization without an asterisk. If you
+miss the first casual mention, or decide later that a keyword is
+important even in casual context, just add the word to a later line.
+
+Notice also that the second mention of authorization does not need to
+be marked; we'll find it automatically, because of your action on the
+first line.
+
+But at the line starting with 'Authorization works,' the word
+'authorization' is copied once more with an added asterisk, because
+this seems to be the spot where the instructor introduces
+authorization for real.
+
+In this example there is a second in-depth discussion in the last
+line, after some intermediate other material is covered. So the
+keyword is marked again. Again, often only one spot in the videos will
+cover a concept in depth.
+
+Once you are done with one transcript, we ask that you list the five
+top-most important keywords among the ones you chose. Maybe for the
+above authorization example those might be:
+
+  o authorization
+  o password table
+  o encryption
+  o roles
+  o profiles
+
+In some cases there might be less than five important keywords. In
+those situations, just list the ones you found.
+
+Some details:
+
+- If a keyword is really a phrase, do copy the whole phrase. For
+  example, in the text 'Databases can parse regular expressions.' you
+  would copy 'regular expressions', rather than just the word
+  'regular.'
+- Capitalization does not matter.
+- You can mark as many keywords as you feel are *sensible* to have in
+  an index. Don't overdo it.
+
+Thank you for your help!
+
+

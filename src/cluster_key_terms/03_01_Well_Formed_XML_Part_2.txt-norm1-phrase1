@@ -1,0 +1,37 @@
+ now you might have noticed that the name of this video is well formed xml
+ so well formed xml is actually the most flexible xml
+ an xml document or an xml stream is considered well formed if it adheres to the basic structural requirements of xml
+ and there aren't many
+ just that we have a single root element as we discussed before a single bookstore in this case that all of our tags are matching we don't have open tags without closed tags and our tags are properly nested so we don't have interweaving of elements
+ and finally within each element if we have attribute names they're unique
+ and that's about it
+ that's all we require for a xml document or a set of xml data to be considered well formed
+ and for many applications that's all we're concerned about
+ in order to test whether a document is well formed and specifically to access the components of the document in a program we have what's called an xml parser
+ so we'll take an xml document here and we'll feed it to an xml parser and the parser will check the basic structure of the document just to make sure that everything is okay
+ if the document doesn't appear to these three requirements up here the parser will just send an error saying it's not well formed
+ if the document does adhere to the structure then what comes out is parsed xml
+ and there's various standards for how we show parsed xml
+ one is called the document object model or dom it's a programmatic interface for sort of traversing the tree that's implied by xml
+ another popular one is sax
+ that's a more of a stream model for xml
+ so these are the ways in which a program would access the parsed xml when it comes out of the parser
+ so one issue that comes up because the xml data is used frequently on the internet is how we display xml
+ so one way to display xml is just as we see it here but very often we want to format the data that's in an xml document or an xml string in a more intuitive way
+ and actually there's a nice setup for doing that
+ what we can do is use a rule based language to take the xml and translate it automatically to html which we can then render in a browser
+ a couple of popular languages are cascading style sheets known as css or the extensible style sheet language known as xsl
+ we're going to look a little bit with xsl on a later video in the context of query in xml
+ we won't be covering css in this course
+ but let's just understand how these languages are used what the basic structure is
+ so the idea is that we have an xml document and then we send it to an interpreter of css or xsl but we also have to have the rules that we're going to use on that particular document
+ and the rules are going to do things like match patterns or add extra commands and once we send an xml document thorugh the interpreter we'll get an html document out and then we can render that document in the browser
+ now one thing i should mention is that we'll also check with the parser to make sure that the document is well formed as well before we translate it to html
+ to conclude xml is a standard for data representation and exchange
+ it can also be thought of as a data model
+ sort of a competitor to the relational model for structuring the data in one's application
+ it generally has a lot more flexibility than the relational model which can be a plus and a minus actually
+ in this video we covered the well formed xml so xml that adheres to basic structural requirements in the next video we will cover valid xml where we actually do introduce a kind of schema for xml
+ the last thing i want to mention is that the formal specification for xml is quite enormous
+ there are a lot of bells and whistles
+ we're going to cover in these videos the most important components for understanding anything xml

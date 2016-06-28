@@ -1,0 +1,56 @@
+ so indexes seem like great things
+ we just throw some indexes onto our data and all of a sudden our queries run much much faster
+ so there must be some downsides and of course there are
+ let me list three of them from sort of least severe to most severe
+ so the first one is that indexes do take up extra space
+ as i mentioned they are persistent data structures that resides with the data
+ i consider this sort of a marginal downside especially with the cost of disk these days its really not that big of deal to use additional space even to potentially double the size of your database
+ the second downside is the overhead involved in index creation
+ so when a database is loaded if we're going to have indexes those indexes need to be created over the data
+ or if we add indexes later on they need to be created
+ index creation can actually be a fairly time consuming operation so i'm going to make this as a medium downside
+ on the other hand once the index is created all the queries run faster so it's usually worthwhile to do it
+ the last one is the most significant one and that's the issue of index maintenance
+ so the index is a data structure that sits to the side of the database and helps answer conditions
+ when the values in the database change then the index has to be modified to reflect those changes
+ so if the database is modified frequently each of those modifications is going to be significantly slower than if we didn't have indexes
+ so in fact in a database that's modified a whole bunch and not queried all that often the cost of index maintenance can actually offset the benefits of having the index
+ so it really is a cost benefit trade off to decide when to build indexes
+ so given that we have this cost benefit trade off
+ how do we figure out which indexes to create when we have a database an applications on that database
+ the benefit of an index first of all on how big the table is since the index helps us find specific portions of the table quickly
+ it depends on the data distributions again because the index helps us find specific data values quickly
+ and finally how often we're going to query the database
+ first of all it's how we're going to update it
+ as i mentioned every time the database is updated indexes needed to be maintained and that's costly
+ every time we query the indexes may help us answer our queries more quickly
+ fortunately over the last decade or so many database system vendors have introduced what's called a physical design advisor
+ in this case physical design means determining which indexes to build on a database
+ the input to the design advisor is the database itself and the workload
+ the workload consists of the sets of queries and updates that are expected to be performed on the database as well as their frequency
+ now actually the design advisor doesn't usually look at the entire database but rather looks at statistics on the database that describe how large the tables are and their data distributions
+ the output of the design advisor is a recommended set of indexes to build that will speed up the overall workload
+ interestingly physical design advisors rely very heavily on a component of database systems that already existed actually one of the most important components of database systems which is the query optimizer
+ that's the component that takes a query and figures out how to execute it
+ specifically it'll take statistics on the database the query to be executed or the update command and the set of indexes that currently exist and it will explore the various ways of actually executing the query which indexes will be used which order things will be done in
+ it estimates the cost of each one and it spits out the estimated best execution plan with the estimated cost
+ so now let's look at how this component can be used to build a design advisor
+ let's just draw the design advisor around the whole thing here and the input to the design advisor again are the statistics and the workload and the output is supposed to be the indexes
+ so what the design adviser actually does is it experiments with different set ups of indexes
+ for each set up of indexes it takes the workload it issues the queries and updates to the query optimizer
+ it doesn't actually run them against the database and see's what cost the query optimizer produces
+ it tries this with different configurations of indexes and then in the end determines those indexes that bring down the cost the most
+ in other words it will give you back those indexes where the benefits of having the index outweigh the drawbacks of having that index in terms of the workload and using the costs that were estimated by the query optimizer
+ if you're using a system that doesn't have a design adviser then you'll have to kind of go through this process yourself
+ you'll have to take a look at the queries and updates that you expect how often you expect them to happen and which indexes will benefit those queries and hopefully won't incur too much overhead when there are updates
+ just quickly here's the sql standard for creating indexes
+ all indexes are given names
+ we can create an index on a single attribute
+ we can create an index on several attributes together
+ we can also say that we want our index to enforce a uniqueness constraint so when we add the word unique it sort of adds constraint enforcement
+ it says we're going to check that all values for a are unique using our index and will generate an error if there are two values that have the same two tuples that have the same value for a and finally we have a command for dropping indexes
+ in summary indexes are really important
+ they're the primary way to get improved performance on a database
+ by building the right indexes over a database for its work flow we can get orders of magnitude performance improvement
+ although we do have to be careful because there are trade offs in building indexes especially for databases that are modified frequently
+ there are persistent data structure that are stored together with the database and there are many interesting implementation issues but in this video and course we're focusing specifically on the user and application perspective determining which indexes to build and how they will gain performance improvement for us

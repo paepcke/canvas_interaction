@@ -1,0 +1,14 @@
+ lastly let me talk a little bit about where privileges actually reside in reality
+ so we have our data that's being managed by a database system and typically we'll have application developers who are working directly with the database system often developing modules that will be invoked by the end users
+ so those application developers have to have privileges on the database to create the modules
+ but then we have the software that sits above the database system that is used by end users and the end users typically don't have privileges themselves
+ they might have separate privileges privileges to access the modules but they're not going to be using the privilege system of the database system
+ and similiarly there may be even more software layered on top of the software that the application developer builds
+ and again that software itself wouldn't be having database privileges but might have an authorization system for the software that it's accessing
+ to summarize database base authorization is important
+ it makes sure that users only see the data that they're authorized to see
+ it guards the database against being modified by malicious users
+ there's a privileged system similar to file system privileges but specific to database constructs and users can only operate on the data for which they're authorized via their privileges
+ there's a grant statement and a revoke statement in the sql standard for granting privileges and revoking privileges
+ and again when a relation is created the owner of the relation starts with all privileges so that's where the granting would begin
+ and finally for having privileges that go beyond simple table level operations views are a very important construct and in fact authorization is one of the most important uses of database views

@@ -1,0 +1,145 @@
+ in this final video we'll learn the modification statements of sql
+ there are statements for inserting data for deleting data and for updating existing data
+ for inserting data there are two methods
+ the first method allows us to enter one tupple into the database by specifying it's actual value
+ so that's the command here
+ we say insert into a table we specify the values of a tuple and the result of that command will be to insert one new tuple into the table with that value
+ the other possibility is to run a query over the database as a select statement
+ that select statement will produce a set of tuples and as long as that set of tuples has the same schema as the table we could insert all of the tuples into the table
+ so those are the two methods of inserting data and we'll see those shortly in our demo
+ to delete data we have a fairly simple command
+ it says we delete from table where a certain condition is true
+ so this condition is similar to the conditions that we see in the select statement
+ and every tuple in the table that satisfies this condition will be deleted
+ now this condition can be fairly complicated
+ it can include sub queries
+ it can include aggregation over other tables and so on again to be seen in our demo
+ finally we're interested in updating existing data and that's done through a command similar to the delete command
+ it similarly operates on one table
+ it evaluates a condition over each tuple of the table
+ and now when the condition is true we don't delete the tuple
+ instead we modify the tuple
+ we take the attribute that's specified here and we reassign it to have the value that's the result of the expression
+ as we'll see in the demo this condition here can be fairly complicated
+ it can have sub queries and so on
+ and this expression can also be quite complicated
+ it can involve queries over other tables or the same table in the database
+ finally i wanted to mention that we can actually update multiple attributes in a tuple
+ so if we're updating a table again exactly the same a single table
+ a condition identifies the tuples to update but now we can update simultaneously any number of attributes each by evaluating an expression and assigning the result of that expression to the attribute
+ as always our demos will use the simple college admissions database with colleges students and applications
+ as usual we have four colleges a bunch of students and a bunch of applications for the students for the colleges
+ we'll first see some insert commands then some delete commands and finally some update commands
+ as i mentioned there's two different forms of insert command
+ one that inserts a tupple at a time by specifying the values and another that uses subqueries to insert tuples
+ so let's start with a simple one
+ let's add a new college carnegie_mellon to our database
+ we do that by saying we want to insert into college we use the keyword values and we simply list the values we want to insert the name of the college the state and the enrollment
+ we run the query and we go take a look now at the college relation
+ let's go to college
+ here we go and we see now that carnegie_mellon has been added to our database
+ now let's do little more complicated insert commands
+ now that carnegie_mellon is in our database let's have some students apply
+ what we're going to do is have those students who haven't applied anywhere yet apply to carnegie_mellon to be a computer science major
+ let me take it step by step
+ let's start by finding those students who haven't applied anywhere so this is a review of what we saw earlier
+ we're going to find those students whose id is not in the sub query that selects all of the ids in the apply relation
+ we run the query and we discovered that we have four students who haven't yet applied anymore
+ the next thing that we're going to do is turn this query into something that constructs the couples that we want to insert into the apply relations
+ as a reminder the apply relation has the student's id the name of the college the major that they're applying for and the decision
+ so we'll construct the student's id of course
+ we want them to apply to carnegie_mellon
+ we want them to major in cs
+ and for now let's say that we don't know what the decision is so we'll put a null value in for the decision
+ so let's run this query and now we see for our four students we've constructed a tuple four tuples that are ready to be inserted into the apply relation they have the appropriate schema
+ so now that we have that query all ready to go we say insert into apply and we run the query and we'll see that tuples are inserted in the apply relation let's go take a look at the relation
+ let's try again here we've got apply and now we see we have our four new tuples and as a reminder in this user interface a blank cell is what's used as a null value
+ now let's see a little more action for carnegie_mellon
+ let's find students who have applied for an ee major at other colleges and have been turned down and let's have them apply to carnegie_mellon and let's accept them right away
+ so again i'm going to do this step by step
+ the first thing we'll do is we will find students who have applied for ee at another college so we'll change this to n where the major equals ee and we want students who were rejected so the decision equals no
+ we have y n for our decision
+ and let's just check how many students we have in that category
+ let's run the query here
+ and now we see there's two students
+ and if we went back and looked at the apply relation we would find that indeed they'd applied to ee and been rejected
+ now let's turn this into a query that constructs tuples that we'd like to insert into the apply relation
+ so we need the student id
+ we want them to apply to carnegie_mellon
+ excuse my slow typing as usual
+ this time they're going to apply to ee and we're going to accept them right away
+ so let's just check that query
+ so now we've produced two tuples that are ready to be inserted into the apply relation
+ we say insert into apply with the sub query we run it and we see that two rows have been inserted into apply
+ let's go take a look at that
+ and we need to refresh here
+ and we look down and we see that indeed the two students have applied to ee and they've been accepted
+ now let's explore the delete command
+ what we're going to do in this example is we're going to find all students that have applied to more than two different majors and we're going to decide that they are unreliable students and we are going to entirely delete them from the database
+ so let's start by forming the query that finds the students who have applied to more than two majors
+ here it is
+ you may want to remember the group i am having clause
+ so it says we go to the apply relation
+ we form groups or partitions by sid's
+ so we're going to consider the set of application for each student individually
+ we're going to count how many distinct majors there are in each group
+ and if that number is greater than we're going to return the student's id and for now let's look at how many majors they applied for
+ so we find in our database that there are two students who have applied for three majors
+ and we don't like those students so were just going to get rid of them
+ here's how we do it we say delete from student where and as a reminder the delete command is of the form delete from the table where and then you can have a simple condition or a complicated condition so this is a sort of complicated condition
+ we're going to see where their sid is in and we're going to turn this into a sub query
+ we don't need to count distinct here and let me just format this a little better
+ is in the set of student ids who have applied to more than one more than more than two majors
+ so we should be deleting students three four five and eight seven six if all goes well
+ let's run the query
+ we did delete two rows let's go back and take a look at the students and we should find that three four five and eight seven six are gone and indeed they are
+ now we've deleted them from the students but we haven't deleted them from the apply relation so we can write the same deletion statement exactly as a matter of fact and just delete from applied
+ now i want to mention that not all database systems allow this particular deletion
+ some database systems don't allow deletion commands where the sub query includes the same relation that you're deleting from and it can be a little tricky but some do postgres does that's what we're running today and so we'll run the query and this time eight rows were affected so we had eight applications for students who had applied to more than two distinct majors and again it will be those same students
+ or we can go back and check if we want to look in the apply relation we'll see that and are now gone from the apply relation as well
+ now going back to our query as i mentioned some database systems don't support this form of deletion and so it's a bit more complicated to do this exact deletion in those systems
+ the way to do it would typically be to create a temporary table put in the results of this sub query and then delete from apply where the student id is present in that temporary table
+ you can give that a try on sql light or mysql and see if you get the same results you ought to
+ let's see one more deletion
+ in this example we have decided that any college that doesn't have a cs applicant is probably not worth keeping in the database and we'll delete it
+ we'll start by doing the select command and then we'll translate it to a delete
+ so this select command finds colleges where their college name is not among the college names in the apply relation where the major is cs
+ in other words this finds all colleges where nobody has applied for cs
+ we run the query and we discovered that nobody's applied for cs at cornell
+ if we want to now delete the tupple
+ what we do it's very simple transformation here
+ we just say delete from college and then the rest is the same where the college name is not among those where someone has applied to cs
+ we run the query it's successful and if we go back and now we look at our college relation we will see that cornell is indeed gone
+ finally let's take a look at some update commands
+ in this first command we're going to find students whose gpa is less than three point six and who have applied to carnegie_mellon
+ we're going to accept those students but we're going to turn them into economics majors
+ let's start by finding the students who have applied to carnegie_mellon with a gpa of less than three point six here the query again this is a review from previous videos we find in the apply relation where college is carnegie_mellon and where the student id is among those students whose gpa is less than three point six
+ we run the query and find that there are two such applications
+ so now what we want to do is update the apply relation and we're going to accept these students but for an economics major so we change the select to an update and this is were going to update the apply relation and we're going to update every tuple that satisfies the conditions we happen to know it's these two tuples and we're going to set the decision for the students to be equal to yes and we're going to set the major to be equal to economics
+ we run the query it succeeded and we go now and we look at the apply relation and we find these two students have now applied to economics and they've been accepted
+ here's a more complicated and highly motivated update command
+ in this command we're going to find the student who has the highest gpa and has applied to major in ee and we're going to change them from an ee major to a cse major a computer science and engineering rather than just having them waste their time on electrical engineering
+ all right so let's take a look at this query which is going to find the applications that we're going modify
+ this query is an excellent review from previous videos because it has triply nested sub queries
+ so again our goal is to find students who have applied to major in ee
+ so here are students who have applied to major in ee but we want them to have the highest gpa of anybody who's applied to major in ee
+ so in the innermost we find the students who have applied to ee their student id's then moving out one level we find the gpa's of all the students who have applied to major in ee
+ now we find all students whose gpa is at least as high as the highest ee major ee applicant and finally we find all students who have applied to ee and have that highest gpa
+ whew
+ ok let's run the query and see who this is
+ we discover it is student
+ and that student has applied three times actually to ee to stanford cornell and carnegie_mellon
+ so now that we have identified those students transforming this command to do the update is actually relatively simple
+ we update apply and instead of having the major be ee then we have the major be csee that major equals sorry cse
+ that's it we run the query
+ and it succeeded and we go back and we look at the apply relation and we refresh and here we see that student has now applied to cse rather than ee at those three universities
+ let's see a couple more updates that are a little silly but demonstrate some features
+ in this example we're going to give every student the highest gpa and the smallest high school in the database
+ so what it's demonstrating is that in the set command the right hand side of the equals can itself be a sub query
+ here we're updating every student
+ there's no where clause so that means every tuple is going to satisfy the condition and for each student we're going to set their their gpa to the result of finding the maximum gpa in the database and we're going to set their size high school to the result of finding the minimum size high school
+ we run the query and we go take a look at the student relation and we will see now that every student has a gpa of and every student has a size high school of two hundred what were formerly the largest and smallest values in the database
+ our very last query says we're in a great mood today let's go to our apply relation and let's accept everybody
+ very simple query just says update apply there's no where conditions so every tuple satisfies the query
+ we set the decision equal y
+ here we go make a lot of students happy let's take a look at the apply relation and we will see now that everybody has been accepted

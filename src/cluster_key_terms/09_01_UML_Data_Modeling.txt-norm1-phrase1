@@ -1,0 +1,205 @@
+ this video talks about data_modeling and uml the unified modeling language
+ the area of data_modeling consists of how we represent the data for an application
+ we've talked a great length about the relational data model
+ its widely used and we have good design principles for coming up with relational schemas
+ we also talked about xml as a data model xml is quite a bit newer and there are no design principles that are analogous to the ones for the relational model
+ but frequently when people are designing a database they'll actually use a higher_level model that's specifically for database design
+ these models aren't implemented by the database system rather they're translated into the model of the database system
+ so let's draw a picture of that
+ let's suppose that we have a relational database management system which is abbreviated rdbms often and i'll draw that as a disk just out of tradition
+ so if we create a database in a relational system the database is going to consist of relations
+ but instead of designing relations directly the database designer we'll draw that up here will use instead a higher_level design model
+ that model will then go through a translator and this can often be an automatic process that will translate the higher_level model into the relations that are implemented by the database system
+ so what are these higher_level models
+ historically for decades in fact the entity relationship model also known as the er model was a very popular one
+ but more recently the unified modeling language has become popular for higher_level database design
+ the unified modeling language is actually a very large language not just for database designs but also for designing programs
+ so what we're going to look at is the data_modeling subset of uml
+ both of these design models are fundamentally graphical so in designing a database the user will draw boxes and arrows perhaps other shapes
+ and also both of them can be translated generally automatically into relations
+ sometimes there may be little human intervention in the translation process but often that's not necessary
+ so in the data_modeling subset of uml there are five basic concepts
+ classes associations association classes sub classes and composition and aggregation
+ we're just going to go through each one of those concepts in turn with examples
+ so that class concept in uml is not specific to data_modeling
+ it's also used for designing programs
+ the class consists of a name for the class attributes of the class and methods in the class and that's probably familiar to you again from programming
+ for data_modeling specifically we add to the attributes the concept of a primary_key and we drop the methods that are associated since we're focusing really on the data_modeling at this point
+ so we'll be drawing our examples as usual from a imaginary college admissions database with students and colleges and students applying to colleges and so forth
+ so one of our classes not surprisingly will be the student class
+ and in uml we'll draw a class as a box like this and at the top we put the name of the class and then we put the attributes of the class so let's suppose that we'll just keep it simple
+ we'll have a student id a student name and for now the student's gpa and down here in uml would be the specification of the methods
+ again we're not going to be focusing on methods since we are looking at data_modeling and not the operations on the data
+ and so one difference is that we'll have no methods
+ another is that we specify a primary_key if we wish and that's specified using the terminology pk
+ so we'll say that the student id in this case is the primary_key
+ and just as in keys in the relational model that means that when we have a set of objects for the student class each object will have a unique student id
+ there will be no student ids repeated across objects
+ in our college application database we're also likely to have a class for colleges so we'll have a class that we call college
+ and for now we'll make the attributes of that class just the college name and the state
+ and again in full uml there might be some methods down here
+ and we'll make the college name and this case be the primary_key
+ so we're assuming now that college names themselves are unique
+ so that's it for classes
+ pretty straightforward they look a lot like relations and of course they will translate directly to relations
+ next let's talk about associations
+ associations capture relationships between objects of two different classes
+ so lets suppose again that we have our student class and i won't write the attributes now i'll just write it like that and we have our college class in our uml design
+ if we want to have a relationship that students apply to colleges we write that just as a line between the students and the college classes and then we give it a name
+ so we'll call it applied and that says that we have objects in the student class and objects that are in the college class that are associated with each other through the applied association
+ if we want to introduce a directionality to the relationship so to say that student are applying to colleges we can put in a arrow there that's part of the uml language although we'll see that it doesn't really make much difference when we end up translating uml designs to relations
+ when we have associations between classes we can specify what we call the multiplicity of those and that talks about how many objects of one class can be related to an object of another class
+ so we'll see that we can capture concepts like one one and many one and so forth
+ so let's look specifically at how we specify those in a uml diagram and for now i'll just use two generic classes
+ so let's say i have a class c and i have a class c and let's say that i have an association between those two classes so that would be a line
+ and i could give that a name let's call it a
+ let's say that i want to specify that each object in class c well i'm just going to write those objects kind of as dots here below the class specification
+ let's say that i wanted to say that each one of those is going to be related to at least m but at most n objects in class c so here are class c objects
+ i'm going to have this kind of fan out in my relationship
+ to specify that in the uml diagram i write that as m and on the right side of the association line and again that's say each object then in c then will related to between m and n objects of c
+ now there are some special cases in this notation
+ i can write m dot dot star and star means any number of objects so what that would see is that each object in c is related to atleast m and as many as it wants elements of c
+ i can also write zero to end and that will say that each object in c is related to possibly none for example here we have one that i haven't draw any relations tips
+ possibly none and up to n elements of c
+ i can also write zero dot dot star and that's basic no restrictions on the multiplicity
+ and just to mention the default actually is one dot dot one
+ so if we don't write anything on our association we're assuming that each object is related to exactly one object of the other class and that's in both directions by the way so i can put a x y here and now we'll restrict how many objects of element of c is related to
+ incidentally uml allow some abbreviations can be abbreviated as a just plain old one and can be abbreviated with just star
+ so let's take a look at our student and college example and what the multiplicity of the association of students applying to colleges might be
+ so let's suppose that we insist that students must apply somewhere so they apply to at least one college but they're not allow to apply to more than and further more lets say that no college will take more than applications so this example is contrived to allow me to put multiplicity specifications on both sides
+ so again we'll have our student class and we'll have our college class and we'll have our association between the student and the college class and i'll just write the name underneath here
+ now applied
+ so lets think about how to specify our multiplicities for this
+ so to specify that a student must apply somewhere but cannot apply to more than colleges we put a one dot dot five on this side
+ it really takes some thinking sometimes to remember which side to put the specification on
+ but that's what gives us the fan out from the objects on the left to the objects on the right
+ so it says each student can apply to up to five colleges and must apply to at least one so we won't have any who haven't applied anywhere
+ on the other side we want to talk about how many students can have applied to a particular college and we said it can be no more than
+ we didn't put a lower restriction on that so we would specify that as to
+ so i mentioned earlier that multiplicity of associations captures some of these types of relationships you might have learned about somewhere else called one to one many to one and so on
+ so let me show the relationship between association multiplicity and this terminology
+ so if we have a one to one relationship between c and c technically one to one doesn't mean everything has to be involved
+ what it really means is that each object on each side is related to at most one on the other side
+ so to say it's a one to one relationship we would put a zero dot dot one on both sides
+ let's see if i can use some colors here
+ so what about many to one
+ many to one says that we can have many elements of c related to an element of c but each element of c will be related to at most one element of c
+ so in that case we still have a zero dot dot one on the right side indicating that each c object is related to at most one object of c but we have the star on the left hand side indicating that c objects can be related to any number of c objects and as a reminder star is an abbreviation for zero dot dot star
+ many to many has no restrictions on the relationships
+ so that would be a star on both sides
+ pretty simple and the last concept is the idea of complete relationships
+ so a complete relationship is complementary to these others
+ it says that every object must participate in the relationship
+ so we can have a complete one to one and that would be one dot dot one on both sides
+ we could have a complete many to one and that would be on the left side one dot dot star and on the right side one dot dot one and finally a complete many to many would be one dot dot star on each side
+ as a reminder the default if we don't specify the multiplicity is a one dot dot one both sides
+ so that would be a complete one to one relationship
+ ok we've finished with classes and with associations
+ now let's talk about association classes
+ association classes generalize the notion of associations by allowing us to put attributes on the association itself and again we'll use our example
+ so we already knew how to specify that students apply to colleges but what if associated with the application we wanted to have for example the date that they applied and maybe the decision of that application
+ we don't really have a way to do that without adding a new construct and that construct is what's known as an association class
+ so we can make a class and we'll just call it app info
+ and it looks like a class it's got the box with the name at the top and the attributes
+ and then we just attach that box to the association and that tells us that each instance of the association between a student and a college has additional information a date of that application and the decision of that application
+ now there's a couple of things i want to mention
+ first of all in a number of examples i'll probably leave out the multiplicities on the ends of the associations
+ that doesn't mean i'm assuming the default one one
+ it's just when it's not relevant i'm not going to focus on that aspect
+ now when we have students associated with colleges
+ so we have a student here we have a college
+ then we have an association between those
+ now what we're saying is that association is going to have affiliated with it a date and a decision
+ what we cannot describe in uml is the possibility of having more than one relationship or association between the same student and the same college
+ so when we have an association that assumes at most one relationship between two objects
+ so for example if we wanted to add the possibility that students could apply to the same college multiple times so maybe you know that want to apply for separate majors
+ that would actually have to be captured quite differently
+ we'd have to add a separate class that would for the application information with separate relationships to the students and colleges
+ so this is a in my mind a slight deficiency of uml
+ again that and it only captures at most one relationship between the two specific objects across the two classes
+ now sometimes we can make a design that has an association class and it turns out we didn't really need it and we're going to come back to multiplicities to see how this can happen so again let's take a look at just generic classes c and c
+ let's say that we have an association between them and then we have an association class
+ we'll just call it ac
+ and that's gonna have some attributes we can call them a and a for now
+ and of course there's attributes in c and c as well
+ let's suppose that the multiplicity on let's say the left side is star so anything goes and on the right side we have one to one
+ so what that multiplicity says is that each object of c is related to at most one object of c
+ so actually exactly one object in this case
+ so we know that there's going to be just one association for each object of c and if there's only going to be one association actually we could take these attributes and we could put those attributes as part of c instead of having a separate association class so for example if this class happened to be the student class and this was the college class and we insisted that each student apply to exactly one college then the attributes we had down here the date and decision could be moved into the student class because we know they're only applying to one college so that would be the date and the decision for the one college they're applying to
+ furthermore if we had zero dot dot one we can still move these attributes here and in that case if a student was not involved in a college had not applied to a college at all or more generally an object of c was not related to any object of c then those attributes would have the equivalent of null values in them
+ by the way it is possible for an association to be between a class and itself
+ for example we could have our student class and maybe we're going to have an association called sibling a student being associated with another student because they're siblings an association between a class in itself is written with a line tgat just goes between the class and itself
+ and then we could label that sibling
+ and for multiplicities we can assume that every student has between and an arbitrary number of siblings lets say so we can put a star on both ends of that association
+ a more interesting association might involve colleges where say we have for every college a flagship main campus
+ but then some colleges have separate branch or satellite campuses so that would be an association between a college and itself saying that one college is a branch of another college
+ now let's think about the multiplicities here
+ first of all when we have a self association in uml we're allowed to label the two ends of the association
+ so i could for example say on one end we have the home campus
+ and on another end we have the satellite campus
+ and now with those labels we can see the asymmetry and that lets us get our associations right
+ so let's say that every satellite campus must have exactly one home campus so that would be a one dot dot here and every home campus can have any number of satellite campuses
+ or actually let's say something else
+ let's say every home campus can have between zero and ten satellite campuses be a zero dot dot ten on that side of the self association
+ ok we're finished with the first three let's move on to sub classes
+ for sub classes we're gonna do a fairly large example that involves students that we're gonna separate into foreign students and domestic students
+ we're also going to separately specify students who have taken ap classes and those will be our ap students
+ so we're going to have the student class as the top of our hierarchy and the student class will again have the student id let's say the student name and gpa and we'll say the the student id is the primary_key for objects in that class we're going to have three sub classes one is going to be the foreign students we'll call it foreign s one is going to be the domestic students and then we're also going to have a sub class for ap students
+ and i'm going to assume that you already know a little bit about sub classing from programming
+ so the idea is that when we have a sub class there are attributes that are specific to the objects that are in that sub class and they'll inherit the attributes from their super class
+ so we're gonna make student be a super class here
+ and this is how we draw it with three sub classes here for foreign student domestic student and ap student
+ and we'll say that foreign students have in addition to a student id a student name and gpa a country that they come from
+ we'll say that domestic students are going to have a state that they come from and we'll also say that they have a social security number which we don't know that foreign students would necessarily have
+ ap students interestingly is going to be empty
+ it's not going to have any additional attributes but the ap students are the students that are going to be allowed to have a relationship with ap courses
+ we'll say that the ap course has a course number and that's probably the primary_key
+ and maybe a title for the course and some units for the course
+ and then when one of our ap students takes the course
+ we'll call this association took
+ we're going to have an association class that goes along with that that's going to have the information let's called it ap info about them taking that particular ap class and we'll say that association class has for example the year that they took the class and maybe the grade that they got in the class
+ and lastly let's add some multiplicities
+ let's say that ap students can take between one and ten ap classes but they taken at least one to be an ap student and let's say that every course has taken by at least one student and arbitrary number of students
+ so this is one of the biggest uml diagrams we've seen so far
+ again this is a superclass up here
+ and we have our subclasses down here
+ and then we also have an association and an association class and some multiplicities
+ and again notice that is ok that there are no attributes in the ap student sub class that sub classes define as those student who have taken ap course
+ here are some terminology and properties associated with sub class relationships a super classes and uml are sometimes called generalization with sub classes called specialization and some sub class relationship is said to be complete if every object in the super class is in at least one sub class and it's incomplete if that's not the case and incomplete is also sometimes known as partial a sub class relationship is known as disjoint if every object is in at most one subclass
+ in other words we don't have any objects that are in more than one subclass and that's sometimes called exclusive
+ and if it's not disjoint then it's overlapping meaning that objects can be in multiple sub classes
+ we can have any combination of these pairs so we can have incomplete overlapping or incomplete disjoint a complete disjoint that are complete overlapping lets take a look back at our example for this example we will probably have the case that it's a complete subclass relationship
+ in other words every student is in at least one subclass presumably every student is either a foreign student or a domestic student and further more we're going to say that it's overlapping because we will have students who for example are both a domestic student and an ap student
+ and in uml the actual notation is to put little curly braces here to specify that that subclass relationship is complete and overlapping
+ to illustrate some of the other cases let's suppose that we didn't have this whole section here with the ap students
+ we only had foreign and domestic students
+ in that case we would say that the subclass relationship is complete
+ but in that case it would not be overlapping
+ it would be disjoint
+ or suppose we didn't have this whole left side here so all we had was the ap student subclass
+ in that case it would probably be an incomplete complete subclass relationship because not everybody is an ap student and they wouldn't make any difference between overlapping and disjoints since there would be only one subclass in that case
+ okay we've now made it to our last concept which is composition and aggregation
+ let me start by clarifying right off that aggregation here has nothing to do with aggregation in sql
+ well it's a completely different concept
+ so let's first talk about composition
+ composition is used when we have a database structure where objects of one class kind of belong to the objects of another class and the example i am going to use is colleges and departments
+ so i've drawn the two classes here
+ and let's say for the department we have the department name and we have say the building that the department is in
+ and so we're assuming that each college has a whole bunch of departments now we can make a relationship an association between colleges and departments to say that the department is in a college but when we have the idea that the departments belong to a specific college then that's when this composition construct is used
+ and the way the composition is written is by putting a diamond over here on the end of the association
+ so composition is really a special type association
+ and we'll fill in that diamond here to indicate composition
+ aggregation happens to have an empty diamond which we'll see in a moment so when we have the diamond and we're creating one of these composition relationships there's implicitly a one dot dot one on the left side so each department belongs to one college but what's kind of interesting here what's little different from the normal relationship is that we're not assuming that this department name is a primary_key exactly
+ we could have this same department in fact even in the same building in different colleges and that would be okay because a department is through this relationship associated with it's college
+ so that was composition objects of one class belonging to objects of another
+ let me give an example of aggregation
+ this is a slight stretch but what i'm going to make is a class of apartments
+ not departments but apartments
+ so we're going to imagine that there are apartment buildings represented in our database maybe they have an address that the primary_key and something like the number of units and what we're going to imagine is that some apartment buildings are owned by or associated with the college but not all of them are
+ and that's what aggregation does
+ so for aggragation we again have a relationship here but in this case we make a diamond on this side that is open and what that says is that each apartment each object in the apartment class is belonging to a college either at most one college or no college at all
+ so we can have apartments that belong to a college we can have kind of free floating apartments and that's what the open diamond which is aggregation is about
+ so in conclusion the data_modeling portion of the unified modeling language can be used to perform database design at a higher_level
+ it's a graphical language
+ we went through the five main concepts of the language and also very importantly uml designs can be translated to relations automatically
+ and that is the topic of the next video

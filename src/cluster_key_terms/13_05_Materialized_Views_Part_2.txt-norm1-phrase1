@@ -1,0 +1,65 @@
+ so just to reiterate the system xx materialized views stored must monitor all the modifications that might invalidate the view
+ when there is a modification either the view can be completely recomputed or sometimes there's clever algorithms called incremental maintenance algorithms that can just make small modifications to the view based on the modifications that were made to the base data
+ so we've talked about queries over materialized views
+ very simple because the views actually stored in the database
+ now what about modifications on materialized views
+ well there's good news and bad news
+ the good news is that since the table is stored if a user issues a modification command and insert delete or update command the system can just perform that command directly on the table
+ the bad news is the base table still need to stay in sync with the view
+ so really the exact same issues that we talked about with virtual views about a modification that the user wishes to execute on the view being propagated to the base tables occur here the only difference is that we're actually modifying the view as well as modifying the base tables so i'm going to draw that same square diagram that we saw for virtual views to explain again the issue with modifications on views so we have our view v and based on our view queries view query q
+ that view is defined over down here our set of relations that could be based table could be other views
+ now the only difference with virtual views is that based on the view query
+ in this case v is actually stored in the database so it's there relations are also in the database of course
+ now the user comes along and the user says i'd like to perform a modification command on v could be an insert delete or update
+ and as a result we can actually run that modification since v is stored so we get some new version of v prime
+ now what the system has to do if it can is perform modifications down here on the base tables and that would be producing then r prime through rn prime
+ and what we want is these modifications down here to be such that the view query when executed on the our primes down here would produce also v prime
+ it's probably better to make that arrow upwards instead of downwards
+ in any case i hope that you get the idea that we still need to stay in sync and the translation of these modifications here as we saw in virtual views have various issues sometimes there's no good meaningful translation
+ sometimes there are many translations and it's hard to know which one is the right one
+ so again the exact same issues arise
+ we're not going to talk about these issues at length in this video
+ i do want to mention actually that more often with materialized views then with virtual views sometime people just say i'm not going to allow the view to be updated
+ materialized views are often used specifically for performance on queries and so users will be allowed to query the view but will not be allowed to modify the view
+ now the next topic i want to address is how a database designer picks which materialized views to create
+ so for virtual views were mostly used as extra layer of abstraction based on modular access to the database or authorization concerns but as i mentioned a couple of times already materialized views are also used for increased performance and that makes the process of picking which ones to create fairly interesting
+ so if we think about the benefits of a materialized view from an efficiency standpoint a number of factors play into whether a materialized view is going to give us increased performance better efficiency
+ one of them is just the overall size of the database one is the complexity of the view
+ if we have the view we don't have to re execute the query so if it's a complex query it might be helpful not to be re executing it over and over
+ then there's the question of how many queries are going to be issued on the database that use the view if we're going to query the view only once or twice it's probably not worth storing it and keeping it up to date
+ the other question then is how many or how often there are going to be modifications to the base data that affect the view because whenever we modify the base data but this affecting of the view means we have to do extra work to keep the view up to date
+ i also alluded to this notion of incremental maintenance
+ incremental maintenance says that we can take modifications to the base data and propagate them into the view without fully recomputing the view
+ full recomputation can be a very expensive process
+ so if we have a workload where we occasionally could use the view for queries but we're constantly updating the database and having to do full recomputation clearly it's not going to be worthwhile to create the materialized view
+ overall if we think about the trade offs we're looking at here at a high level it's what's known as a query update trade off this actually occurs in various places in database design and applications
+ so how often are we going to query the database where we get increased performance on our queries versus how often we're gonna get to update the database where updates are gonna cost us in performance
+ so the idea is then to analyze the workload over the database also based on these factors like the size of the data and the complexity of the view and decide whether we are going to get more advantage by increasing the queries and that's not offset by the disadvantages of the updates
+ by the way does this sound familiar to you at all this query update trade off decision of whether to make this extra structure that speeds up queries but slows down updates
+ probably if you're thinking you'll realize that indexes or when we talked about them have exactly the same trade offs to consider
+ when we build an index are we going to speed up queries but we are going to slow down updates
+ and actually materialize views in a certain way generalize the concept of indexes
+ and in fact that brings us to our next and last topic which is the topic of automatically rewriting user queries to use materialized views
+ and this again is similar to indexes
+ so when we build an index in a database for a database when we run a query we don't actually see that the query is deciding to use the index
+ we build the index and it will speed up the queries because the system itself will make that decision to use the index
+ sophisticated database systems these days are also starting to be able to look at what materialized views are present in a database and automatically rewrite queries to use those views without the user being aware of that the same query answer will be given it will be given faster based on the use of an existing materialized view
+ so as a simple example of that let's suppose we have a materialized view with the student id college name and major of students who have applied to a college in california
+ this is similar to but not identical to the view that we showed earlier
+ so this is going to be a stored table always up to date
+ and this view is available to be used by the system if it can speed up a user query
+ so a user may come along with this query down here and what's this query doing
+ it's finding students
+ this time we're looking at the id and the gpa of students who have applied to a california college and they want to major in c s
+ at that college and they have a gpa over
+ so this query has been issued over just the base tables but we'll see how the system might decide that if it has at its disposal this materialized view up here it could modify the query to use the materialized view and it will get better performance because this materialized view has already done some of the work that would be done if we executed the query down here from scratch
+ so here's what the system can do in the rewrite it can take this college relation out altogether
+ that reference to college is gonna be taken care of in our view and let's change this apply here to be the california apply view instead of the apply relation itself
+ with the college table gone we don't need that first joined condition anymore and we also don't need to check that the college is in california that's taken care of in our view
+ the remainder of the query with apply replaced by california apply will give us exactly the same result and presumably it will do it much faster again because some of the work in executing the query and evaluating the conditions has already been done when the view was created
+ so you can imagine actually a very complicated and interesting problem for the database system itself
+ it has lots of materialized views let say stored in the database v v all the way to v you know and along comes a user query q might be a complicated query and the system wants to determine whether any of these views could be used to help q have better performance
+ and sometimes that performance improvement can be really really significant
+ again depending on the complexity of the view the size of the database
+ the converse problem is a problem of figuring out which views we want to design to help our queries and again that's a very interesting problem as well
+ unfortunately many times that problem is left to the human doing database design although there are some tools being developed right now as we speak to help users with that design problem

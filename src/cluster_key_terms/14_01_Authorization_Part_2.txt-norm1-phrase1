@@ -1,0 +1,24 @@
+ so far so good but now let's introduce a little twist
+ let's suppose that we have a user that we want to authorize to access information in the student relation but only for students who have applied to stanford
+ how can we possibly do that
+ why don't you give that a thought
+ well i'll give you the answer right away
+ the way we do that is actually by using views
+ so we can create a view that gives us the student information for stanford applicants only
+ then we can grant users privileges on the view rather than directly on the relations
+ so here's our view
+ it says we'll find all students where their student is in the ids of the students who have applied to stanford and we'll call that view ss for stanford students
+ now we can give a particular user the select privilege on ss
+ and that allows them to select the data that's in the view but not see any of the data outside of the view
+ specifically they won't be able to see student information if the students didn't apply to stanford
+ let's take a look at a second example that involves views
+ let's suppose that we want to authorize a user to delete applications but only applications that are to berkeley
+ so again we'll set up a view
+ this one's a little simpler
+ it's just the view of the app of the records of the apply relation where the college name is berkeley
+ and we'll call the view ba
+ and then what we want to grant to the user is the ability to delete the delete privilege from the b a view
+ now in this case we do need to have that view be updatable by the system that's supporting it
+ so in our video about views we discuss this issue
+ those are the only examples i'm going to give for now but i do want to emphasize that views are quite important for customizing authorization to specific user needs
+ and in fact authorization is one of the most important uses of views in database systems

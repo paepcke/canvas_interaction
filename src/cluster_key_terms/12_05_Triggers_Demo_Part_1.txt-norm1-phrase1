@@ -1,0 +1,322 @@
+ now let's see triggers in action
+ we're going to cover a number of features in the demonstration which is going to be in two parts
+ we'll cover before and after triggers with both insert delete and update triggering events
+ we will not be covering instead of triggers which are used primarily for views and so will be covered in the material on views
+ we'll show access to new and old data for the modified data that causes a trigger to be activated
+ we'll show trigger conditions and trigger actions
+ we'll show some triggers that are being used to enforce constraints
+ we'll show a trigger chaining where the execution of one trigger activates another trigger
+ and we'll show triggers that activate themselves and cyclic behavior of triggers conflicts when multiple triggers are activated at the same time and finally nested trigger invocations when a trigger has several actions which themselves activate other triggers
+ the video introducing triggers used the sql standard
+ it so happens that no database system implements the exact standard and in fact some systems deviate considerably from the standard not only in the syntax for specifying triggers but also the behavior meaning one has to be very careful to understand the trigger system that one is using
+ in terms of the primary open source systems at the time of this video postgres has the most expressive trigger system
+ sqlite is a little bit less expressive
+ and mysql is considerably more restrictive than the other two
+ let's look at some details
+ in terms of expressiveness and behavior postgres is the closest to the standard
+ it really does implement the full standard
+ it has row level and statement level triggers access to old and new rows and tables
+ unfortunately it uses its own cumbersome and somewhat awkward syntax making it not very suitable for our demonstration
+ sqlite implements row level triggers only
+ and it also has immediate activation which is a deviation in behavior from the standard
+ as we discussed in the introduction the standard for triggers is that if we have a modification statement that makes many changes
+ regardless of whether we have a row level or statement level trigger we execute triggers at the end of the statement
+ whereas in sqlite we have row level triggers only and there after each row level change to the database
+ as a result sqlite also does not have access to new table or old table like sqlite mysql also has only row level triggers and they are activated immediately instead of at the end of the statement
+ they also don't have access to old and new table
+ there are two other significant limitations in mysql
+ one of them is that mysql only permits one trigger per event type
+ so for example only one trigger for any inserting into a particular table or deleting from a table
+ furthermore there's limited trigger training allowed in mysql
+ now these features if we want to call them that
+ do you mean that the triggers in mysql are quite understandable in how they behave because they're fairly restricted in what they can do and specifically in how they can interact
+ for our demo we'll be using sqlite and let me mention a few things about the syntax
+ since there's row level triggers only for each row although it's a allowed to be specified in the trigger is implicit if it's not present
+ as i mentioned there's no access to old table or new table and so as a result sqlite has no referencing clause instead prebuying these variables old and new two old row and new row we'll see that clearly in the demo
+ finally the action in sqlite triggers is a begin end block with any number of sql statements
+ the demo is in two parts and in this part of the demo we'll be in the first five features the other three will be covered in the second part
+ in the first part of the demo we'll be using our usual simple college admissions database with the college table student table and students applying to colleges
+ we will be starting with our usual database our four colleges our set of students and our set of couples of students applying to colleges
+ the idea is that we'll be creating several different triggers and then we'll be modifying the database and see how those triggers behave
+ here's our first trigger
+ let me mention that the particular interface we're using does not allow us to execute create trigger commands from this window so we'll actually be executing the demand separately
+ our first trigger will intercept insertions into the student table and we'll check the gpa
+ if the inserted gpa the gpa of the inserted student is greater than or less than or equal to that student will be automatically applying to stanford for a geology major and applying to mit for a biology major
+ let's look a little closer at the tax we give the trigger a name
+ we specify the triggering event
+ in this case its insertions on student
+ next we have the option of specifying for each row
+ now as a reminder in the sqlite system only the for each row option is implemented
+ so even if we actually left this clause out it would be a low level trigger
+ furthermore sqlite does not have a referencing clause
+ so in the sql standard there's the new row old row new table and old table which can be bound to variables in the referencing clause
+ in sqlite only new row and old row are supported and therefore they're bound automatically to the predefined variables new and old
+ now remember new and old gives us a way to access the data that was modified that caused the trigger to be activated
+ in the case of an insertion there is only new data be the inserted row
+ if we had an update we'd have both new and old available to us for the modified row
+ and if we had a delete we'd have only old
+ we'll see that in later examples
+ in this particular example we're going to use new in our trigger condition to reference the insertion that caused the trigger to be activated
+ we check if that insert a tuple have a gpa within the range we're looking for
+ if it does then we go_ahead and the trigger will go_ahead and execute the action
+ the action will insert two new tuples into the apply table and it will again use the new variable to access the inserted tuple we're working on so it will get that sid for the inserted tuple
+ insert that together with stanford geology and a null decision into apply
+ and similarly have that new student id applying to mit biology with a null decision
+ we've created the trigger
+ so now let's try inserting some new students into our database
+ specifically we'll insert kevin whose gpa is in the range that we're looking for for automatic application and laurie whose gpa is outside of that range
+ let's go_ahead and insert those tuples and let's take a look at our data
+ when we look at our student table we see that kevin and laurie have been inserted
+ now let's take a look at apply
+ here we see that student and that was kevin with the gpa has automatically been inserted to apply to stanford in geology mit in biology and as a reminder an empty cell indicates a null value
+ so our trigger was activated by those insertions and it performed insertions into apply for kevin but again not for laurie because her gpa did not satisfy the trigger condition
+ now let's make a more dramatic database modification to test out our trigger
+ we 're going to essentially copy the entire student table into itself
+ so we're going to double the size of the student table
+ we're going to take each tuple and we're going to add a new tuple that's going to be identical except we're going to increment the student id in order to generate a unique id
+ so when we insert all of these tuples into the student table again all of those whose gpa is in the range between and should have an automatic tuple into inserted into the apply actually two tuples inserted into the apply table having them apply to stanford and mit
+ so here's the insert command we're going to insert into student the result of a query
+ that's a reminder of how we do that from previous videos
+ our query will select from the student all four attributes except that it will increment the id
+ so again this will double the size of the student table
+ copying every tuple but with a new student id
+ so let's go_ahead and perform the insertions and now let's look at the student table
+ so we'll refresh and we see that the table has doubled in size and again we incremented the ids
+ what we're most interested in of course is what happens in the apply table
+ and now we should have a bunch of new applications to stanford and mit and indeed we do and if we looked back we'd see that each of these ids corresponds to a student whose gpi is in the range to satisfy the condition of the trigger
+ we'll leave all these tuples in
+ we're going to actually use them in later triggers that we're going to see
+ this trigger is very similar maybe identical to one that we saw in the introductory video
+ this trigger simulates the behavior of cascade delete when we have a referential integrity constraint from the student id in the apply table to the student id in the student table
+ very specifically it it's activated when we have the lesions from student and again i'm including for each row and i'll do it in every trigger even though if i left it out it the behavior would be the same
+ so for each it's deleted from student it has no condition so it always executes the action and the action says look and apply for any student id whose id is equal to the deleted one
+ and now and again we're using this reserved keyword old as a reminder that's automatically bound to old row and so it will mind to the tuple that's being deleted that activated the trigger
+ we'll find any apply records that refer to the deleted student id and we'll delete those apply records as well
+ so first let's take a look at our student table because what we're going to do is delete from this table every student whose id is greater than so quite a number of these students are going to be deleted and then we're going to see that the applications of those students and there's quite a large applications greater than will be deleted automatically by the trigger
+ so here's the simple deletion command to remove all students whose id is greater than
+ we'll run the command and let's go take a look
+ ok
+ so we go to our student table and we see indeed that a lot of students have been deleted those with ids greater that five hundred we go to our apply table and we see similarly but automatically all of the apply records with the student id greater than have been deleted as well
+ now let's create a trigger that simulates a cascaded update again for referential integrity
+ so let's suppose we are trying to implement using triggers referential integrity from the c name that appears in apply to the c name that appears in college
+ and when we update college a name we're going to propagate those updates to any apply records that refer to that
+ so let's take a look at the trigger
+ this is our first trigger that's activated by update commands
+ so the event triggering event there's an update on the college table and very specifically we've specified the attribute c name
+ and if we left out c name then any update to college would activate this trigger
+ but by putting in c name it's a little more specific and more efficient
+ again for each row which would be implicit if we left it out
+ and then let's take a look so what our action does
+ similar to the other the previous trigger we don't have a condition
+ we update we run the action automatically
+ as a reminder we have now new and old variables since it is an update
+ so each activation of this trigger will be for one row
+ new will give us the new value of that row
+ old will give us the old value of that row
+ so our action is going to update the apply table
+ it's going to find college names that refer to the old college name and it's going to change them to refer to the new college name
+ so i would say this is actually a very intuitive trigger easy to understand to perform cascaded update
+ so let's modify two of the college names in our database
+ we'll change stanford to the farm and for those of you who aren't aware the farm is actually a common nickname for stanford
+ and we'll change berkeley to bezerkley and i'll let you draw your own conclusions on that one
+ so let's go_ahead with the update
+ and let's take a look at our data now
+ and this time we'll just go straight to the apply relation
+ we'll refresh and we'll see that our references to berkeley have been changed automatically to bezerkley and stanford to the farm
+ and again i did not run an update command on the apply table
+ i only ran the update command on the college table which has also changed
+ and then the trigger was activated and propagated the update to the apply records
+ so our previous two triggers simulated integrity constraints
+ the next two triggers we're going to write are going to simulate key constraints
+ specifically we are going to say that the college name needs to be unique within the college table
+ so we're going to write triggers that intercept both inserts and updates for the college table
+ and if they try to create or update a college name that creates a duplicate
+ we're going to disallow that command by raising an error
+ one other difference between our previous triggers is that these are going to be activated before the insert rather than after the insert
+ so let's take a look
+ we have a trigger that's activated before inserts on college and they do have a condition
+ what it looks for is another college that has the same college name as the one we're trying to insert
+ so that would be a key violation if we attempt to insert a college name that already exists
+ in the action we're using a sqlite specific construct raise ignore so raise is an error raise command and ignore says simply ignore the updates that's underway
+ so when we try to insert a duplicate college the trigger will be activated and rays ignore will say disallow that insert
+ now we actually have a second trigger hidden underneath here
+ this trigger handles updates to the college table
+ when a college name is updated similar to the insertion it checks whether there's already a college with the proposed new college name
+ and if it is it again uses the raise ignore command
+ now both of these triggers were specified before the modification and that's necessary in order to use this particular condition
+ if we had specified after the modification as our type of triggering event then the condition would have to check something different it would have to check if we created duplicate college names but again we're using the before version here which is quite natural and the raise ignore command also works in tandem with the before
+ because what it says is to abandon the modification that's under way
+ now i will mention that the raising of errors in trigger action is quite system specific
+ so what i'm showing you is simply the sqlite version that we would use in the case of a before trigger
+ so now let's make some attempted modifications to college
+ as a reminder we've already changed stanford to the farm and berkeley to bezerkeley
+ so in our first two insertion attempts we'll try to insert stanford into our college table and that should actually work because we changed the name stanford to the farm
+ we'll also try to insert another couple for mit and that should not work because that should activate the trigger and detect that mit would be a duplicate if it were inserted
+ we'll run the commands we don't get any errors it's not raising an error
+ as a reminder the raise ignore command simply stops the command that's underway
+ so we'll take a look at our college table and we see that the new stanford couple was inserted successfully but the attempt to insert a mit couple was rebuffed by our trigger
+ now lets try some updates as a reminder we had one trigger that intercepted inserts and another that intercepted updates
+ let's try to change bezerkeley back to berkeley
+ we run that
+ we go to college
+ and we see that it did in fact change back no problem because it's not creating a key violation
+ now let's try changing the farm back to stanford
+ we'll run that
+ again we won't get an error but when we go and look at the college table we'll see that the farm is still there
+ because we've inserted the new stanford tuple the trigger intercepted our update and didn't allow it to be changed because it would've caused a duplicate value
+ so frustrated by that let's change the farm to stanford again our favorite misspelling of the university
+ we'll run the command
+ we'll take a look
+ and indeed the farm has now been changed to stanford because it's not creating a duplicate value
+ incidentally there were a few things happening behind the scenes while we were experimenting with those key triggers
+ don't forget we define a trigger that intercepts updates on the college name and propagates them to the apply table
+ so while we were changing those college names to experiment with the key triggers we were also modifying the apply table
+ let's go see what happened to that table
+ we go here and we look at apply and we see our berkeley students are still berkeley
+ while we weren't looking they change to bezerkeley and back to berkeley
+ our standford students change to the farm and then they change to standford
+ so in order to not offend my sense
+ abilities
+ i'll be deleting those students those apply records before we proceed
+ now let's take a look at a trigger that does a little more than enforce a constraint
+ what this trigger is going to do is monitor applications to colleges and when the number of applications to a college exceeds it's going to rename that college to have the college name and then dash done indicating that we're done with the college
+ specifically it will be triggered by insertions to apply since that's what going to increase the number of applications
+ and when there's an insertion it 's going to count the number of apply records that have applied to that college
+ now this is an after trigger so it will include the one we've inserted and new is going to again refer to the inserted couple so we will count the number of applied records to that particular college and see if it exceeds ten
+ if is does it's going to update the college corresponding to the one that's being applied to and we'll do that again by looking at the new college name
+ and it's going to take that college record
+ and it's going to set its name to be the current name and this is a concatenation operator with the string done
+ once we run it you'll we'll see exactly how it works
+ another thing we'll be demonstrating in this example is trigger chaining where the activation of one trigger activates an action that activates another trigger
+ and let me remind you of the first trigger we created where when we inserted students with a certain gpa we automatically inserted apply records for those students to stanford and mit
+ so what i'm going to actually do rather than insert apply records directly to experiment with this trigger i'm going to insert student records
+ those student records if they have the right gpa will activate this trigger which will automatically insert into apply
+ and then those insertions will activate our apply trigger which will check to see if the college now has more than ten applicants
+ as a reminder our trigger that does automatic insertions of applications we'll be having students applying to stanford and mit
+ so we have no students who have currently applied to stanford that's because i deleted those misspelling stanford and that left us with none but that's fine that will help us test our trigger
+ let's see how many students we have who have applied to mit
+ we currently have
+ five who have applied to mit
+ finally let's see how many existing students we have with a gpa that's in range for automatic application and the reason i'm checking that is because i'm going to insert copies of those students that will activate my trigger and show the trigger chain
+ so i currently have six students with gpas in range so if i copy those six students as new insertions then we'll be adding six applications to mit
+ that will bring us to a total of eleven and six applications to stanford bringing us to a total of six
+ so if all goes well with the trigger chaining and everything else when we after we we insert those six new students we should get new apply records that will cause mit to be done because it's exceeded the threshold of ten but stanford not to be done
+ so let's see if that all works out as we expect
+ so my insertion command is going to completely replicate the student table
+ it's going to make one additional copy of every student
+ and as a reminder that will cop that will insert six new students whose gpa is in range for automatic application
+ so let's go_ahead and run the insert command and let's go straight to our colleges and see what happens
+ indeed mit is now labeled as done but stanford hasn't changed
+ and let's look at our apply table to understand what happened so all of the couples actually starting here were inserted in this round of trigger activation so we added six students
+ six of them had gpa's in range
+ that gave us twelve applications one each to stanford and mit
+ these other applications were left over from before
+ then the fact that mit went over ten applications meant mit was relabeled as done and there was a bit more trigger chaining that happened
+ don't forget our update propagation trigger which is still there
+ that one took mit done when it was modified and sent it back to modify the values of mit and the apply table
+ this might be a good example
+ for you to download and play with yourself or re run the video just to entirely understand what's going on
+ now let's see if we can coax stanford to be done as well
+ so how many students do we have who applied to stanford
+ six
+ those are the six applications that occurred as a result of the most recent trigger firings
+ and how many students do we have with a gpa in range
+ well we have of them
+ we have the that we had originally and then we copied each one of those over in our previous example
+ so now if we once again copy our student table insert into student an entire copy then we'll be inserting twelve students with gpa's in range
+ those students will automatically apply to stanford and berkeley
+ that should put stanford over the threshold of ten and change it's name to stanford done let's go_ahead and execute the command and then let's take a look at the college table and see where things stand
+ indeed now stanford is done
+ let's also take a look at the apply table because there's some quite interesting things going on here
+ so we see all of our tuples with mit done and stanford done and let's just remember what happened
+ we insert tuples with a student
+ those tuples are causing automatic insertions to stanford and mit
+ however when stanford or mit went over threshold over applications then the name was modified in the college table to be mit done or standford done
+ that modification in the college table activated our update propagation trigger which then had the change in the college table propagate to the change in the apply table
+ but then at some point along the way we see that we stop having mit done and stanford done and we revert back to mit and stanford
+ well why is that
+ that's because when we insert the mits and stanfords automatically and we go back and count how many there are for mit and stanford after we've changed this to done we're back to zero
+ if we kept going and then we hit the threshold again of then we would see that standford done and mit done change as well
+ sorry
+ that standford and mit change back to standford done and mit done
+ so this is very complicated
+ again what i'm really trying to demonstrate here is well of course just the basic behavior of triggers but also the complexity
+ when triggers trigger other triggers that further trigger other triggers and back
+ and we'll be seeing more of that in the second demonstration video
+ but i did want to illustrate it here
+ and there's one more point that i want to make which is that as i mentioned in span class sttranscriptcontent name id sttranscriptcontent contenteditable true style margin top px margin right px margin bottom px margin left px padding top px padding right px padding bottom px padding left px border top width px border right width px border bottom width px border left width px border style initial border color initial font weight inherit font style normal font size px font family verdana vertical align baseline border top style none border right style none border bottom style none border left style none border width initial border color initial line height px text align left text transform none text decoration none webkit box shadow none box shadow none text rendering auto cursor pointer webkit transition property background webkit transition duration s webkit transition timing function linear webkit transition delay initial background image in triggers roll level triggers are activated immediately after each row level change
+ that is different from the sql standard
+ in the sql standard even a row level trigger will be activated after the entire statement
+ and that's what for example postgres does
+ but in sqlite we're activating immediately
+ and actually this particular behavior if you think about it would be somewhat different if we were activating the triggers at the end of the entire command
+ even if we are doing it one row at a time
+ again very complicated stuff
+ you might want to pause and just think about how this works or even better experiment yourself
+ let's go back to a simpler trigger
+ this one intercepts insertions on student before they occur and it checks if the high_school size is in range
+ if the high_school size is below or greater than we're going to assume that's an error and we're going to raise our ignore
+ again that's a sqlite specific syntax that says don't perform the modification that's underway
+ now that occurs before inserts on students
+ we also have a trigger don't forget that incurs after inserts on students and that one checks whether the student's gpa is in a particular range and inserts the student into the apply table
+ and we're fine to experiment a little bit with how these two triggers interact
+ now i've deleted all the data from the existing data from the student and the apply tables just to simplify looking at what happens with these triggers
+ now let's try inserting some students
+ all three of the proposed insertions have gpas that are in range for automatic application
+ however the second and third students have high_school size that are out of range
+ so when we run the inserts hopefully the trigger will disallow the second and third insert for the high_school being out of range and the first trigger will activate automatic applications for nancy
+ actually you know what
+ there's a little hint down here what happened
+ we can see that the first insertion occurred third
+ and the second and third zero rows were affected
+ so we can already see that it did what we expected but let's go take a look at the data and make sure that it did
+ so if we refresh the apply we'll see that in fact there was one application to stanford and one at mit for let's make sure that's our student
+ that was nancy and the other two students that we attempted to insert were not inserted into student and they had no apply record inserted either
+ now let's change this one to an after trigger
+ we're still going to enforce the same constraints that high schools need to be between and but we're going to check the constraint after couples have been inserted
+ in that case it's not sufficient to just ignore the operation that's under way because the couples been inserted already
+ what we'll do instead is we'll manually delete the tuple that caused the violation we'll delete from student the student that was just inserted
+ now we have two triggers that are activated at exactly the same time
+ the one that checks this constraint and the one that does automatic applications
+ let's see what happens when we perform some insertions we'll insert two students
+ again both of them have gpas that are in range for automatic application
+ however the second student's size of high_school is out of range
+ it's
+ so both students will be inserted but then our trigger that checks the constraint on high_school size will we hope delete rita
+ so let's go_ahead and execute and now let's take a look at our data
+ we'll refresh and we see that as expected quincy was inserted with no problem
+ rita was in fact inserted but then our trigger was activated and she was deleted
+ now let's take a look at the apply table
+ a ha
+ so rita's applications are there
+ and if we look closely at the triggers and we recommend you do that you will see that both of them are activated by the inserts at the same time
+ now one of them is going to delete rita but the other one is going to process the insert and insert rita into the apply table
+ as a grand finale we'll just show two triggers that are a little bit more complicated and more realistic
+ and you may want to pause the video to look at these closely because i'm not going to go into them in great detail
+ the first trigger automatically accepts students to berkeley if they have a high enough gpa and they came from a large enough high_school
+ so it will intercept insertions into the apply
+ it will check if those conditions are satisfied and have to use sub queries here to find the student's gpa and to find the student's high_school size
+ again i urge you to pause the video and take a look to make sure you understand what's happening
+ if this student satisfies the conditions then their apply record is set to a decision of yes and we apply that apply record by matching the student id and the college name
+ once again i've deleted all existing students and apply records just to keep the demonstration simple
+ we're going to insert two students amy and bob
+ they both have high gpas but only bob's high_school size is big enough to grant him automatic admission to berkeley
+ then we're going to have our first student amy applied to berkeley and our second student bob applied to both berkeley and stanford
+ and we'll see that bob is going to automatically be admitted to berkeley
+ so we've run the query and we take a look at apply and we see that we have inserted the three apply records but only the second one and that's bob's application to berkeley had a decision that was modified
+ and our last trigger is also more complex and i guess sort of realistic
+ what this trigger monitors is enrollments of colleges and at the point that an enrollment of a college is increased past the threshold of then some action will be taken on its application
+ anybody who's applied to ee at that college will be deleted from the application table and all remaining applications where the decisions have been yes are going to have the decisions set to undecided
+ one thing that is interesting about this trigger is it does monitor the dynamic behavior of the database and look for a threshold to be passed
+ and that's something that triggers can do that simply cannot be done with constraints
+ some of our other triggers many of them as you saw were more effectively monitoring static constraints
+ we set the threshold at
+ we see that standford has students and the others aren't very close to the threshold
+ for this trigger i've also repopulated our database so we have a whole bunch of apply records
+ so let's go_ahead and make an update and see what happens
+ we're going to increase all college enrollments by
+ that will cause stanford to pass the threshold of and it should activate the trigger and change the apply table
+ when we go look at the apply table we see that indeed the electrical engineering majors have disappeared and all of the other applications to stanford that were formerly yes have now been set to undecided
+ that concludes the first half of our demonstration of triggers
+ in the next video we'll be exploring even further the interesting interactions that triggers can have and how they behave
+ see you then

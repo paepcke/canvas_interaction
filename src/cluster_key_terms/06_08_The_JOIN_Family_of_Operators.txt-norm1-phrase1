@@ -1,0 +1,46 @@
+ now we'll learn about the joined family of operators in sql
+ going to our select from where statement
+ in the from clause we list tables
+ separated by commas and that's implicitly a clause product of those labels but it's also possible to have explicit join of tables and this follows the relational algebra style of join
+ there's a few different types
+ one of them is what's called the inner join on a condition
+ and we'll see that that's equivalent to what in relational algebra we were calling the theta join where the theta here is a condition
+ so it's effectively taking the clause product but then applying the condition and only keeping the tupples in the clause product that satisfy the condition
+ the separate type of join we can use in sql is the natural join and that is in fact exactly the natural join in relational algebra where it equates columns across tables of the same name so it requires the values in those columns to be same to keep the tupples in the clause product and then it also eliminates the duplicate columns that are created
+ we'll see this very clearly when we get to the demo
+ the third type of join operator and sql is again interjoin but with a special clause called using and listing attributes and that's kind of again the natural join except you explicitly list the attributes that you want to be equated
+ and finally the fourth type and actually the most interesting type is the other join and there's a left outer join right outer join and full outer join and this is again combining tupples similar to the theta join except when tupples don't match the theta condition
+ they're still added to the result and patted with no values
+ now i will say right off that none of these operators are actually adding expressive part of sql
+ all of them can be expressed using other constructs
+ but they can be quite useful in formulating queries and especially the outer join is a fairly complicated to express without the outer join operator itself
+ so as usual we'll be doing our demo with our simple college admissions database with college tables student table and applied table
+ so let's move ahead to the demo
+ as usual we'll have four colleges a bunch of students and students applying to colleges
+ let's start with the simple parade that we've seen before which matches students names with majors to which they've applied
+ so that combines the student in apply relation making sure the student id is the same across the two relations and gives us the names and major back
+ now if you remember your relational algebra you can see clearly that this is a join of the student on apply relation
+ actually a natural join but we'll come to them in we're gonna first rewrite it using the equivalent of a theta join operator which is called inner join in sql and so this does the theta join or the combination of student and apply on a specific condition so we'll change the where to on and it is effectively the cross product of the two tables
+ but then when it does the cross product it checks this condition and only keeps the tuples that satisfy the condition
+ so let's run that query and of course we get the same result
+ the two queries we saw are exactly equivalent we're just expressing them a little bit differently
+ now the inner join is the default join operator in a sql
+ so we can actually take away the word inner and when we run that we again get the same result because join is an abbreviation for inner join
+ happens when we have a joint operator with additional conditions besides the one on the two tables
+ so this is also a query that we've seen before
+ this times the name and gpa of students who came from a high school with less than a thousand students
+ they've applied to major in computer science at stanford
+ so we ran the query and we find just to a students in our result
+ so now let's rewrite that using the join operator
+ so we type join instead of comma the comma being the cross product and the join condition is again combining the student and apply records where the student id matches and the rest of this becomes our where condition
+ go ahead and run the query and we get the same result
+ now it turns out that we can actually put all of these conditions into our on clause so we can make this where back into an and and our on clause now is the and of all all three conditions
+ we run the query and we get the same result
+ now you're probably thinking how do i know what to put in the on clause and what do i put in the where clause because this are obviously equivalent
+ well first of all there are many equivalent queries in sql
+ we can write things in different ways
+ in theory sql query processor should execute them all in the most efficient possible way but the join clause in particular is often used as a hint to the query processor on how to execute the query
+ so if we put all of these in the on condition
+ we're sort of saying as the query processor does the join it should be all the conditions when we make this aware
+ it's sort of a hint saying here's the condition that really applies to the combination of the tuples and the rest of the conditions apply to separate attributes
+ now let's take at what happens

@@ -1,0 +1,60 @@
+ now let's compared json and xml
+ this is actually a hotly debated comparison right now
+ there are signification overlap in the usage of json and xml
+ both of them are very good for putting semi structured data into a file format and using it for data interchange
+ and so because there's so much overlap in what they're used for it's not surprising that there's significant debate
+ i'm not gonna take sides
+ i'm just going to try to give you a comparison
+ let's start by looking at the verbosity of expressing data in the two languages
+ so it is the case that xml is in general a little more verbose than json
+ so the same data expressed in the formats will tend to have more characters in xml than json and you can see that in our examples because our big json example was actually pretty much the same data that we used when we showed xml
+ and the reason for xml being a bit more verbose largely has to do actually with closing tags and some other features
+ but i'll let you judge for yourself whether the somewhat longer expression of xml is a problem
+ second is complexity and here too most people would say that xml is a bit more complex than json
+ i'm not sure i entirely agree with that comparison
+ if you look at the subset of xml that people really use you've got attributes sub elements and text and that's more or less it
+ if you look at json you got your basic values and you've got your objects and your arrays
+ i think the issue is that xml has a lot of extra stuff that goes along with it
+ so if you read the entire xml specification
+ it will take you a long time
+ json you can grasp the entire specification a little bit more quickly
+ now let's turn to validity
+ and by validity i mean the ability to specify constraints or restriction or schema on the structure of data in one of these models and have it enforced by tools or by a system
+ specifically in xml we have the notion of document type descriptors or dtds we also have xml schema which gives us xsd's xml schema descriptors
+ and these are schema like things that we can specify and we can have our data checked to make sure it conforms to the schema and these are i would say fairly widely used at this point for xml
+ for json there's something called json schema
+ and you know similar to xml schema it's a way to specify the structure and then we can check that json conforms that and we will see some of that in our demo
+ the current status february is that this is not widely used this point
+ but again it could really just be evolution
+ if we look back at xml as it was originally proposed probably we didn't see a whole of lot of use of dtds and in fact not as xsds for sure until later on
+ so we'll just have to see whether json evolves in a similar way
+ now the programming interface is where json really shines
+ the programming interface for xml can be fairly clunky
+ the xml model the attributes and sub elements and so on don't typically match the model of data inside a programming language
+ in fact that's something called the impedance mismatch
+ the impedance miss match has been discussed in database systems actually for decades because one of the original criticisms of relational database systems is that the data structures used in the database specifically tables didn't match directly with the data structures and programming languages
+ so there had to be some manipulation at the interface between programming languages and the database system and that's the mismatch
+ so that same impedance mismatch is pretty much present in xml wherein json is really a more direct mapping between many programming languages and the structures of json
+ finally let's talk about querying
+ i've already touched on this a bit but json does not have any mature widely used query languages at this point
+ for xml we do have xpath we have xquery we have xslt
+ maybe not all of them are widely used but there's no question that xpath at least and xsl are used quiet a bit
+ as far as json goes there is a proposal called json path
+ it looks actually quiet a lot like xpath maybe he'll catch on
+ there's something called json query
+ doesn't look so much like xml query i mean xquery
+ and finally there has been a proposal called jaql for the json query language but again as of february all of these are still very early so we just don't know what's going to catch on
+ so now let's talk about the validity of json data
+ so do json data that's syntactically valid simply needs to adhere to the basic structural requirements
+ as a reminder that would be that we have sets of label value pairs we have arrays of values and our values are from predefined types
+ and again these values here are defined recursively
+ so we start with a json file and we send it to a the parser may determine that the file has syntactic errors or if the file is syntactically correct then it can parsed into objects in a programming language
+ now if we're interested in semantically valid json that is json that conforms to some constraints or a schema then in addition to checking the basics structural requirements we check whether json conforms to the specified schema
+ if we use a language like json schema for example we put a specification in as a separate file and in fact json schema is expressed in json itself as we'll see in our demo we send it to a validator and that validator might find that there are some syntactic errors or it may find that there are some symantic errors so the data could to be correct syntactically but not conform to the schema
+ if it's both syntactically and semantically correct then it can move on to the parser where will be parsed again into objects in a programming language
+ so to summarize json stands for java script object notation
+ it's a standard for taking data objects and serializing them into a format that's human readable
+ it's also very useful for exchanging data between programs and for representing and storing semi structured data in a flexible fashion
+ in the next video we'll go live with a demonstration of json
+ we'll use a couple of json editors we'll take a look at the structure of json data when it's syntactically correct
+ we'll demonstrate how it's very flexible when our data might irregular and we'll also demonstrate schema checking using an example of json's schema

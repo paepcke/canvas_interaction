@@ -1,0 +1,143 @@
+ in this video we'll introduce the concept of triggers
+ in a separate video we'll give an extensive demonstration of triggers in a running system
+ as a reminder triggers are event condition action rules
+ they specify that whenever a certain type of event occurs in the database check the condition over the database and if it's true execute an action automatically
+ there are a couple of reasons that triggers are used fairly extensively actually in database applications
+ one of them is to move logic that monitors the database from the applications into the database system itself
+ that allows the monitoring to be done more efficiently and it's also more modular so it doesn't have to be repeated in every application
+ a second and probably the most common use of triggers is simply to enforce integrity constraints
+ and you might wonder why are those constraints not enforced by the constraint system
+ well one reason is that some constraint systems are limited and we can enforce more expressive integrity constraints using triggers and second of all triggers can do automatic repair of constraints when they are violated by specifying the repair as the action portion of the trigger
+ i do want to mention that implementations of triggers vary significantly across the different database systems
+ in this introductory video we'll be talking about the sql standard for triggers
+ but in our demonstration we'll be using the triggers as supported by sqlite
+ so here we have the syntax of creating a trigger using the sql standard
+ the second line is the event portion of the trigger
+ it says that the trigger should be activated either before or after or instead of specific events and the specific events that can be specified are insert on a table t or delete on a table t or update two particular columns on a table t and actually the columns themselves are optional
+ update up columns on table t let's skip the referencing variables clause for a moment and go on to the for each row
+ so for each row is an optional clause that states that the trigger should be activated once for each modified tuple
+ let me explain what the deal is here
+ so when we run say a delete command on the database that delete command might delete say ten tuples
+ if we specify for each row in our trigger then we will run the trigger ten times once for each deleted tuple
+ on the other hand if for each row is not present then we will execute the trigger once for the entire statement
+ now one tricky thing is that no matter what the trigger is activated at the end of the statement
+ but its trigger it's activated either ten times for the ten deleted tuples or once if for each row is not present
+ now let's talk about the referencing variables
+ i'm going to write them down here
+ the idea of referencing variables is that they give us a way to reference the data that was modified that caused the trigger to be activated
+ so we can have in the referencing variables these are key words old row as
+ and then we can give a name to the old row
+ we can have new row as and again name and we can also have old table as a name and new table
+ and there's a whole bunch of things to explain here so it's possible to have up to all four of these on a single trigger but there are certain restrictions and let me explain
+ first of all if we have a trigger that is based on insertions then we can only refer to new data
+ that would be the new inserted data
+ if we have a trigger activated by deletions then we can only refer to the old variables for the deleted data
+ if we have the case of update then we can refer to both old and new and we will get the previous version of the updated values and the new version of those values
+ so we can only have both old and new in the case when our trigger is activated by an update
+ now let's talk about about row versus table
+ so if we have a row level trigger as a reminder that will be triggered once for each modified tuple but after the entire statement has run
+ so lets take for example a row level delete
+ in the case of deletes we can only have old but we could have for a row level trigger both the old row and the old table
+ the old row would refer to the specific tuple that the trigger is activated for
+ and again if we deleted ten rows and it will be activated ten times once for each deleted tupel
+ while the old table will refer to all ten of the updated of the deleted tuples
+ now there's often a lot of confusion with the old table
+ it's not referring to the old state of the database it's referring specifically to the set of tuples that were in this case deleted
+ if our tuple if our trigger is not for each row if it's a statement level trigger then we cannot refer to the row level variables but we only have the table level variables
+ so to reiterate if we had say an insert that was row level then we could have both new row and new table
+ if we have a statement level insert we can only have new table
+ if we have a row level delete then we can have both old row and old table but if it's a statement level delete then we can only have old table
+ finally if we have a row level update then we can have all four of these
+ but if we have a statement level update then we would only have the old table and the new table
+ just to clarify when i say row level i mean that for each row is present and when i say statement level i mean that for each row is not present
+ ok
+ so now we covered the those clauses
+ fortunately the last two are a little bit easier
+ the condition here is it's like a sql wear condition
+ it's going to test the condition on the database and if the condition is true then the action will be performed
+ actually what this is really like is like a general assertion
+ we saw there were certain ways of describing conditions that are on entire databases and we will see a number of examples
+ and finally last of all the action in the sql standard the action is a sql statement
+ in systems some systems will have a set of simple statements and a begin end bracket
+ some will have stored procedures
+ so this is a case where the systems do vary quite a bit
+ we'll be using sql light which has as it's action begin and end with any number of sql statements within it
+ well that all seems very complicated and there are quite a few complications with triggers but in many cases they're relatively straight forward and i think the next thing we'll do just to relax for a moment is take a look at a fairly simple example
+ in this example we're going to implement referential integrity as we discussed in the previous video
+ let's say that we have a table r whose attribute a references attribute b of table s and we want to implement cascaded delete
+ as a reminder what that means is if we delete from table 's' then any 'a' values that reference the deleted b values will themselves also be deleted
+ ok so let's specify that in a trigger it's really quite simple
+ we give the trigger we say after we delete on 's' so this trigger will be activated whenever we delete from 's'
+ we're going to make it a row level trigger so that means we're going to activate the trigger once for each deleted row
+ we're going to set up that deleted row to be called o
+ and finally there's no conditions so whenever we have a delete from s then in our action we're going to delete from r all tuples where the a value equals the b value of the deleted couple from s so that should all be pretty easy to understand
+ just as one little change let's take a look at writing the same trigger as a statement level instead of a row row level trigger
+ so now i've taken away for each row and let's look at what changes we need to make
+ well first of all we don't have old row anymore as i mentioned for on statement level triggers we only have old tables
+ so now we're going to set up a variable called ot that's referencing old tables and remember this is going to the set of deleted couples
+ it's not the old value of the table but just the value of the tuples that have been deleted
+ the other thing we need to change is the action of the trigger
+ instead of matching one tuple at a time we just look for tuples in r where the a value is among the b values that were deleted from s and we delete those couples from are
+ and that works exactly the same as the row level version of the trigger
+ now you might wonder which version you should use well it's turns out some systems don't support both systems and you don't have a choice
+ for this particular example probably the statement level trigger would be more efficient
+ since it only activates the trigger once and takes care of all the referential integrity cascaded deletes in one fell swoop
+ so this example shows that triggers can be quite natural
+ but there are a lot of complexities as i alluded to in the original slide that showed the full trigger syntax
+ so just to go through some of the trickier issues we talked already a bit about row level versus statement level
+ and the use of the different new and old row and new and old table
+ with triggers that execute after the modification this is fairly understandable
+ but things can get more complicated when we have or instead of the modification that causes the trigger to be activated
+ secondly we can have multiple triggers activated at this same time its pretty simple
+ what if i declared two separate triggers that are activated by deletes say on a particular table
+ the we have to ask which one is going to go first and maybe the behavior will differ depending on which one goes first
+ so that's something that needs to be thought about when one defines triggers and understands how they're going to behave when the database is modified
+ another possibility that we have to consider is not when triggers are activated at the same time but when triggers activate each other in a chaining effect so i might have a trigger that's activated and it performs an action that the database modification that activates another trigger which in turn can activate other triggers
+ we can also have triggers that trigger themselves potentially
+ we can have cycles well when a trigger triggers itself it's a cycle
+ but we can also have t that triggers t that triggers t that triggers t again then we need to worry about issues is like termination both for cycles and self triggering
+ we can also have a case where a trigger has multiple actions and each one of those actions individually activates other triggers
+ so we start getting a nested behavior in the trigger activation
+ so again all of these need to be both defined carefully and understood carefully when one creates triggers so that one knows how one will behave in practice
+ another issue that's really more about trigger design is exactly how to write one's triggers when conditions are involved
+ sometimes it's possible to put a condition either as part of the action or as part of the when clause in a trigger
+ now certain trigger languages are limited in what they can say on the when and then again we wouldn't have a choice
+ but sometimes we do have choice and it could effect actually the efficiency of trigger execution depending where we put the condition
+ finally i'll mention again that implementations do vary significantly especially across these tricky issues
+ now most of these issues are actually going to be discussed further in the demo
+ but the demo that i'm going to give is going to use sequel lite which only has row level triggers so let me give one more example that talks about the difference between row level and statement level triggers since i won't be able to show that in the demo
+ this example is completely contrived to show a few issues
+ let's suppose that we have a table t and it has two attributes
+ attribute k is a key for the table and attribute v is a value
+ and we're going to have a trigger that's going to be activated when we perform insertions on t and let's suppose that we perform a large number of insertions or at least a few insertions and it's going to be a role level trigger
+ so we're going to execute the trigger once for each row that's inserted
+ so as a reminder when we have a row level trigger we can refer both to the specific tuple that's being processed for one activation of the trigger and we can also refer to the entire set of changes that were made by the modification command that caused the trigger to be activated
+ so in this trigger we're going to use nr to refer to the current inserted row that we are processing and nt to refer to the entire set of inserted rows
+ okay so what is this trigger doing
+ it's going to process one inserted row at a time
+ and when it processes that row it's going to check whether the current average value of 'v' in table 't' so that's the current average value is less than the average of the inserted rows
+ now one thing i want to say is that this value is stable so even if we modify t nt doesn't change
+ nt is always set to the set of inserted tuples ok
+ so we check whether t's average is less than the nt average and if it is then we're going to modify the update that modified the tuple that was inserted
+ so we're going to update t and we're going to set the value to be v for the tuple that we're currently processing in other words the tuple whose key is in new row
+ ok this is really really tricky
+ i'm trying to demonstrate a bunch of things here
+ so just let's back off and think again for a minute about what happened
+ we inserted a whole bunch of tuples
+ after we inserted those tuples we first determined what the average value of the inserted tuples
+ that's this average value here
+ let's say it's
+ then we're going to for each inserted tuple check is the current average and t less than
+ if it is we're going to update that tuple that was inserted to be greater and that's going to be end of that activation
+ so there's a couple of things that i wanted to point out specifically with this trigger
+ one is that there is no statement level equivalent of this trigger
+ if we try to write this without the four each row we can never get the same behavior because what we're doing is looking at each row one at a time and deciding whether to increase its value
+ so we might increase the value for some subset of the rows but not all of them and it would not be possible to do that with a statement level trigger
+ the second thing that this triggers shows is the potential to have a non deterministic final state
+ because we're gonna again increase the value of the inserted tuples until the average exceeds a certain threshold and then we'll stop in updating those values or increasing those values
+ so the subset of tuples whose values are increased is determined by the order in which the trigger processes the set of inserted couples
+ ok so this trigger is really really complicated
+ now of course nobody is going to ever write a trigger that looks exactly like this
+ part of the point was to show a bunch of different features and show a bunch of different subtleties
+ specifically in the context of row level versus statement level because we aren't able to make that contrast with the demonstration that we're going to give
+ so to conclude triggers are event condition action rules that are used used to move monitoring logic from the application to the database and to enforce complex constraints potentially with automatic repair and the implementations vary significantly

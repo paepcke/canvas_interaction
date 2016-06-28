@@ -1,0 +1,218 @@
+ in this video we'll introduce querying xml data using xslt
+ as a reminder querying xml data is not nearly as mature as querying relational data due to it being much newer and not having a nice underlying algebra like the relational algebra
+ we already talked about xpath which was the first language developed for querying xml data
+ and we've also talked about xquery which was actually developed after xslt but it's similar to xpath in it's style where xslt which we're going to cover in this video is actually quite different
+ xsl stands for the extensible stylesheet language and it was introduced originally but soon extended to included transformations and xslt is currently much more widely used than xsl
+ here's how we can think of xslt as a query language
+ we have an xslt processor and we feed to that processor our xml data in the form of a document or a stream
+ and we also give the processor a specification in xslt which by the way is expressed using the xml format
+ the processor takes the data and the specification and it transforms the data into a result which is also expressed as an xml document or string
+ now if we think about traditional database query processing there's actually a natural mapping
+ if we think even about relational processing we have a query processor and a database
+ we feed the data to the query processor we feed the query to the query processor as well and out comes the answer
+ so xslt processing although it really is through transformations it can be thought of very much like querying a database
+ so even though xslt be thought of as a query language the query paradigm itself is quite different from what we're used to with sql or even with xpath or xquery
+ it's based fundamentally on the notion of transforming the data
+ and that transformation occurs with rules
+ to understand what the rules do and how the transformations work it's again very instructive to think of the xml as a tree
+ so let's take our bookstore data and again make it a tree as we did before when we were first learning about xpath
+ so we have some books sub elements and we have a magazine sub element and i won't be elaborating all of these
+ we'll just imagine sub trees here with our book we have a title and we have some authors
+ the title might be our leaf so we'll have a first course in database systems for example whereas our authors may have author sub elements and within those author sub elements we might have first name name and last name abbreviated here with string values for those and of course more authors sub elements as well
+ so that give the basic idea of a tree structure of xml exactly as we've seen before
+ so now let's see what happens with xslt in light of this tree structure
+ so the first thing that we have is the concept of matching a template and replacing it
+ so the idea in xslt is that we can write an expression that finds a template that finds portion of the xml tree based on template matching
+ for example we might find books that have certain authors and once we find those will actually replace the entire subtree with the result of what we put in our template
+ for example we might decide that want to pick the title here and replace this entire subtree with the title
+ or we might match down to our authors and we might find our first name and last name and say replace this entire author sub element with the concatenation of the first and last name
+ again the idea being that you write templates that match within the tree using in fact xpath as we'll see as one of the portions of writing those templates and then replace that portion of the tree
+ we can also do that recursively
+ so we can for example decide that we're going to replace this book with a different element and then recursively apply our templates to its children
+ we'll see that in a demo
+ it takes a little getting used to again
+ the xslt language has the ability to extract values and again it often uses xpath expressions in order to do that
+ it also has some programming language like constructs
+ it has a for each so we can do iteration and it has conditionals so we can do if
+ all of these will be much better seen in the demo
+ finally i'll have to mention that there's some somewhat strange behavior having to do with white space in xml data and some default behavior which we'll see in the demo
+ and there's also an implicit priority scheme when we have multiple templates that can all match the same elements
+ so let's move directly to the demo
+ we're again going to be using our same bookstore data and we'll see a number of xslt examples
+ even more than xquery or xpath our examples will not be exhaustive but they will give a flavor of the language and you'll be able to express some fairly powerful queries using just what we show in the videos
+ now let's see xslt in action
+ let me first explain what we have on the screen
+ in the upper left window we have the document that we'll be querying over
+ it's the exact same bookstore data that we've been using for all of our examples
+ so i'm actually going to make that a lot smaller so that we can see our templates better
+ in the upper right corner xslt templates
+ and every example we're going to do is going to have us opening and closing a style sheet with some parameters is to tell us how we'd like to display our results
+ and then i'll be putting different templates between those opening and closing tags
+ notice again that xslt is expressed using xml once we have our data and our set of template matching rules we'll run our transformation and in the bottom we'll see our result
+ so you can think of it as a query in the upper right the data in the upper left and the result displayed in the bottom
+ now even more than xquery it's not going to be possible to explain every single intricacy of the templates that we're going to write
+ so i again encourage you to pause the video to take a look as well as download the data file and the transformation file so that you can experiment with them yourself
+ our first example is going to do some very simple template matching
+ it's going to look for book sub elements and when it finds them it's going to replace those book sub elements with a book title element the value of the title component of the book and a closing tag book title
+ and it's similarly going to match magazines of elements and replace those magazines of elements with an element that's an opening tag of magazine title the value of the title sub element of the magazine and the closing tag
+ so again the template will look through the xml tree
+ they will match the sub elements in the tree
+ it'll match the book of elements and the magazine of elements
+ and for each one it will replace those subelements with the expression in this case with our opening and closing tags that have changed and the value of the title
+ we run the transformation and we see indeed that the results are our four book titles now opening and closing tags that are book titles and our four magazine titles
+ for our next example we're going to only match books that satisfy a condition
+ we do that by in our matching expression using xpath
+ now there's one small strange thing here which is we can't write the less_than symbol we actually have to use the escape symbol for less_than
+ but otherwise this template finds books whose price attribute is less_than just like we do in xpath using the square brackets for conditions and when it matches those books what it does here is it copies those books
+ so this is an important construct that says if i match the book i'll copy the book i'll select dot which the current element so in effect it's saying find the books and retain them exactly as they are
+ let's run the transformation and take a look at what we get
+ we can see that we got this book because it's price is and we have another book whose price is and another book whose price is
+ but we do see something a little bit strange here
+ we got our books so we also have these strings here
+ these long bits of text that we well we don't really know where they come from
+ well this is one of the peculiarities of xslt
+ when you have elements in your database that aren't matched by any template what xslt will do is actually return the concatenation of the string leaf or text leaf values of those elements
+ i know it seems kind of strange
+ there's actually a simple fix for that
+ we're going to add a second template that matches those text elements and for those returns nothing
+ so here we've added a template and let me explain
+ what we're matching here is elements that satisfy the text predicates so that will match those leaf text elements and when we write a template that has no body so we open the template and then we close the template with no body at all that says match the element and then don't replace with anything at all
+ so this is very useful construct the templates that don't have a body for getting rid of portions of the data we're not interested in
+ so let's run the transformation now and take a look at the result and now when we scroll down we see that all of that extraneous text that we saw in the previous example is now gone
+ so as we've seen xslt works by defining templates that are matched against the data
+ when a portion of the data is matched by a template the template says what to do
+ we might place that portion of data with something different and we might just remove that portion of the data from the answer or we might just copy it over into the answer
+ now let's explore what happens when we have portions of the data that are matched by more than one template in our xslt specification
+ so here we're going to have three templates
+ the first two templates both match book elements
+ the first template says when we match a book element just throw it away
+ again this is an example of the template when we don't have a body that says eliminate the matched elements from the answer
+ the second template says to do exactly the opposite
+ says when we match a book sub element keep that book sub element exactly as it is
+ as a reminder this body here says copy the current element into the result
+ our third template matches magazines and this one we just have one and it says copy the magazine into the result
+ so let's go ahead and run this transformation and see what happens
+ well first of all we got an ambiguous rule match so that's good
+ the system recognized that we have two different rules that are matching the same element
+ but then it did decide to give us a result
+ so let's take a look at what happened
+ it did return in fact all of the books in the database as well as all the magazines
+ so we can see that it chose to use the second template instead of the first template when we had the ambiguity
+ so let's try an experiment
+ let's take our two book templates and let's just reverse their order
+ so now we have the one that copies first and the one that eliminates second
+ let's run the transformation and indeed something changed
+ we no longer got the books
+ so what we can deduce from that is that when we have two templates that both match and we get this ambiguity warning it still does the transformation and it chooses the second of the matching transformations
+ actually it turns out not to be quite that simple
+ it doesn't always choose the second one
+ in this example we're going to change our first template to match only books whose price is less_than
+ so we'll use the same syntax we used before that before
+ we have to escape that less_than character like this
+ less than
+ close our score bracket
+ so now our first transformation says when we find books that are less_than let's return them and when we find any book let's not return it
+ so again we're going to have some ambiguity let's run the transformation
+ well we actually didn't get an ambiguity error this time or warning and the reason is that xslt actually has a built in notion of some templates being more specific than others and when a template is more specific it is considered the higher priority template
+ so what happened when we ran this particular transformation is the books that where the price was less_than were matched by the first template and because that one's considered more specific they were not matched by the second template
+ so we can see below that we did get back all of the books that are less_than and none of the other books and again we got back all of our magazines
+ so let's make one last change to experiment
+ let's take our second book and let's add to it a simple condition that's satisfied by every book which is the condition that the book has a title sub element
+ again this is xpath
+ now perhaps our two rules have equivalent specificity in which we case we would again have ambiguity
+ let's just delete our result here and then let's run the transformation and see what happens
+ indeed now we have an ambiguous rule match because both of these templates have a condition so they are considered equivalent again just when just like when neither of them had a condition
+ and now that they're considered equivalent again the second one is going to take precedence because as you can see we didn't get any books in our result
+ so even though we have some books that are less_than those books also have a title so those books were matched by the second template and they were not returned
+ so what you can see from these examples is that you do need to be very careful when you write xslt programs or queries where multiple templates will match the same data
+ now let's look at a couple of different ways of copying our entire input data as a result of our query
+ our first example is the simplest one
+ we write a template that matches the root element of the document
+ as you may remember from xpath a single slash is the root element
+ and then as the body we have that copy of template that copies the entire current element
+ let's run the transformation and we will see the we get our entire database as a result
+ incidentally we could change that slash to be bookstore
+ it would do exactly the same thing since our bookstore is our root element
+ okay delete this run the transform and once again we get the entire database as our result
+ now i'm going to show action with a much more complicated way of copying the entire document but it uses an important kind of template that we'll see in other contexts
+ this template is our first example of recursively applying templates to our result
+ what we have here is a template that matches absolutely anything in xml data
+ this is actually an ex path expression that says math an element with star that means any element tag any attribute at star or any text leaf of the xml data
+ so again this or construct here is seen quite frequently in xslt specifications to match just anything at all in the data
+ when anything at all is matched that element of the data is copied and then the templates are applied recursively to everything below that's of any type
+ so it may be best just to take my word for it or you can spend some time on your own thinking about exactly why this works but again the idea that we match any type of element in our xml element attribute or text and we copy that object and then we apply the templates to all of its sub elements recursively again copying them
+ now obviously this is not the best the easiest way to copy an entire document
+ we saw the easiest way to do it with our previous example but we'll soon see why this particular template is valuable
+ when we run it of course we get back the entire document
+ now the reason that this type of template is valuable is that we can use this as one of our templates and then add additional templates that give us exceptions to copying the whole document
+ and that will allow us to copy the whole document except with changes in certain parts and what i'm adding here actually is a whole bunch of additional templates
+ so the first one says apply all templates recursively to link to the entire document
+ the second says when you find while you're applying them recursively that you're at an attribute called isbn we'll change that to a sub element
+ so we'll match the isbn attribute
+ we'll change it to a sub element similarly to what we saw before by giving an open tag isbn and the value of the current element
+ we'll similarly take our attributes our price attributes and change them to sub elements and our editions our months and our years and our magazine
+ and last of all we'll also make a change to our authors
+ when we match an author instead of having sub elements we'll convert those sub elements to be attributes the last name attribute and the first name attribute
+ so let's run the transformation and we'll see our data is now significantly restructured
+ we have our bookstore and we have our books but our isbn numbers are now sub elements and in our authors the last names and first names are attributes
+ and all of the books are restructured in that fashion and our magazines again have attributes restructured as sub elements
+ now let's see what would have happened if we ran this xslt specification but we didn't have this mega template at the beginning that does the recursive application of templates to the entire database
+ when we run the transformation now well we get a kind of surprising result
+ we won't try to analyze it in its entirety
+ it's a combination of only matching automatically of sub elements and not attributes
+ and furthermore dumping out all the text leaves like we saw in an earlier example
+ so again presuming that we would not want this to be our result that shows the necessity of including the sort of generic template that matches every type of object in the database and recursively applies templates to its children
+ now let's switch gears entirely
+ what we're going to do in this transformation is effectively write a program
+ we're going to use the for each and sorting and an if statement and the program is furthermore going to take the xml data and it's going to transform it into html which we can then render in a browser
+ so it's just one template that matches the root element of our document and once that root element is matched it spits out the tag html it sets up the table so again we're actually writing the result here and put some headers for the table
+ and then we see a for each that says we're going to run the body of the for each for each book in the database
+ we're gonna sort the result by its price
+ if the price is less_than then we're going to generate a row in the table
+ and that row is going to be set up with italics for the title and it's going to give the value of the price it's going to close the row and we're going to close all the tags
+ so again this is quite different in a couple of ways
+ first of all that it's written more in a programmatic style and second of all that the result actually going to be html
+ let's run the transformation and we can see the result here which is indeed html
+ in fact we can take this very html and we can render it in a browser and see how nice it looks
+ and here it is
+ we can see very beautifully formatted the three books that cost less_than sorted by price with the title in italics all formatted in an html table
+ and that was with not a very complicated xslt program
+ so it's not surprising that xslt is used frequently for for translating data expressed in xml to html format for rendering as well as being used as a query language
+ our last two examples are back to a more traditional template matching style
+ again we're going to start with this recursive template match that matches everything in the database
+ that means we're gonna copy everything over except we're gonna make one type of change
+ specifically we're going to change we're going to take jennifer out of the database and then we're going to change widom to ms widom
+ so every place where we have jennifer as the first name and widom as the last name we'll end up with just a name ms widom
+ specifically we do it with two templates
+ the first template says when we find a first name where the data in that first name equals jennifer okay so we're again are using the dot to refer to the current element
+ the data is a built in function
+ so a first name that's equal to jennifer
+ when we match that we want to we'll actually return nothing
+ there's no body in this template so that will remove that element
+ now you might wonder why we didn't just write a condition that said first name equals jennifer
+ the problem is to write that condition the current element would be the parent and we don't want to remove the parent we actually want to remove the first name itself
+ in addition to removing first names that are jennifer we'll also match last name templates where the value is widom and we will replace those with an opening tag name the string is widom and a closing tag name
+ so let's run the transformation and let's take a look
+ and we will see in the case where the author was jennifer widom it's now the single element name ms widom and we should see that occur a few other times in the database as well
+ as our very last example let's perform the same transformation but let's do it with just one template
+ what we'll do is we'll look for office of elements where the first name equals widom
+ now we don't need to use data
+ so first name equals widom
+ and we'll take those entire author sub elements and we'll replace them with an author sub element where the name is widom
+ so we need to put author here
+ let's get rid of this automatic simply generated closing tab we want it to be over here
+ we'll get rid of this first template
+ so again we're going to make exactly the same change but we're gonna do it with a single template
+ it's going to look for authors where the first name is whoops better make that jennifer
+ and it's going to replace them with the author sub element with just ms widom
+ we run the transformation and let's take a quick look at what we got
+ and we again see exactly the same result with a somewhat simpler program
+ that concludes our demonstration of xslt
+ again we've shown only some of the constructs
+ we haven't gone into great detail or walked through the syntax
+ xslt is very powerful
+ we've seen quite a few different things
+ we've also seen a little bit of non intuitive behavior
+ we have to be a little careful with white space
+ we have to be a little careful when we have multiple templates that match the same data
+ but once we get it all figured out it can be quite powerful for transforming data and for querying data

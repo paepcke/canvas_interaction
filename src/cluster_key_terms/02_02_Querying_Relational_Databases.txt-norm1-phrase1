@@ -1,0 +1,71 @@
+ in this video we're going to learn about querying relational databases
+ we're not going to focus on a specific query language we'll do that later
+ we're just going to talk about querying relational databases in general
+ let's start by talking about the basic steps in creating and using a relational database
+ so by the way i should mention that database people have this habit of drawing databases and database systems as gigantic disks
+ so i'll be using that same habit
+ so the first step is to design the schema of the database and then create the schema using a data definition language
+ so as we discussed in previous videos in a relational database the schema consists of the structure of the relations and the attributes of those relations
+ so we set those up inside our big disk
+ once that's ready the next step is to load up the database with the initial data
+ so it's fairly common for the database to be initially loaded from data that comes from an outside source
+ maybe the data is just stored in files of some type and then that data could be loaded into the database
+ once the data is loaded then we have a bunch of tuples in our relation
+ now we're ready for the fun part which is to query and modify the data
+ and so that happens continuously over time as long as the database is in existence
+ so let's just say for now that we're going to have human users that are directly querying the database
+ in reality that typically happens through say an application or a website
+ so a user will come along and we'll ask a question of the database and we will get an answer
+ he might come along and ask another question q and he'd get another answer back
+ the same human or maybe a different human might ask to modify the database
+ so they might want to insert new data or update some of the data and the database will come back and say okay i made that change for you
+ so that's the basic paradigm of querying and updating relational databases
+ relational databases support ad hoc queries and high level languages
+ by ad hoc i mean that you can pose queries that you didn't think of in advance
+ so it's not necessary to write long programs for specific queries
+ rather the language can be used to pose a query as you think about what you want to ask
+ and as mentioned in previous videos the languages supported by relational systems are high level meaning you can write in a fairly compact fashion rather complicated queries and you don't have to write the algorithms that get the data out of the database
+ so let's look at an example of a few queries
+ let's go to again to our imaginary database of students who are applying to colleges
+ and here's just three examples of the types of things that you might ask of a relational database
+ you might want to get all students whose gpa is greater than who are applying to stanford and mit only
+ you might want to get all engineering departments in california with fewer than applicants or you might ask for the college with the highest average accept rate over the last five years
+ now these might seem like a fairly complicated queries but all of these can be written in a few lines in say the sql language or a pretty simple expression in relational algebra
+ so some queries are easier to pose than others that's certainly true
+ though the queries you see here are as i said pretty easy to pose
+ now some queries are easier for the database system to execute efficiently than others
+ and interestingly it's not necessarily
+ these two things aren't necessarily correlated
+ there are some queries that are easy to post but hard to execute efficiently and some that are vice versa
+ now just a bit about terminology
+ frequently people talk about the query language of the database system
+ that's usually used sort of synonymously with the dml or data manipulation language which usually includes not only querying but also data modifications
+ in all relational query languages when you ask a query over a set of relations you get a relation as a result
+ so let's run a query cue say over these three relations shown here and what we'll get back is another relation
+ when you get back the same type of object that you query that's known as closure of the language
+ and it really is a nice feature
+ for example when i want to run another query say q that query could be posed over the answer of my first query and could even combine that answer with some of the existing relations in the database
+ that's known as compositionality the ability to run a query over the result of our previous query
+ now let me talk briefly about two query languages
+ we'll be learning these languages in detail later but i'm just going to give the basic flavor of the languages here
+ relational algebra is a formal language
+ well it's an algebra as you can tell by its name
+ so it's very theoretically well grounded
+ sql by contrast is what i'll call an actual language or an implemented language
+ that 's the one you're going to run on an actual deployed database application
+ but the sql language does have as its foundation relational algebra
+ that's how the semantics of the sql language are defined
+ now let me just give you a flavor of these two languages and i'm going to write one query in each of the two languages
+ so let me get rid of this little line here
+ let's start in relational algebra
+ so we're looking for the id's of students whose gpa is greater than and they've applied to stanford
+ in relational algebra the basic operators language are greek symbols
+ again we'll learn the details later but this particular expression will be written by a phi followed by a sigma
+ the phi says we're going to get the id the sigma says we want students whose gpa is greater than and the college that the students have applied to is stanford
+ and then that will operate on what's called the natural join of the student relation with the apply relation
+ again we'll learn the details of that in a later video
+ now here's the same query in sql
+ and this is something that you would actually run on a deployed database system and the sql query is in fact directly equivalent to the relational algebra query
+ now pedagogically i would highly recommend that you learn the relational algebra by watching the relational algebra videos before you move on to the sql videos but i'm not going to absolutely require that
+ so if you're in a big hurry to learn sql right away you may move ahead to the sql videos
+ if you're interested in the formal foundations and a deeper understanding i recommend moving next to the relational algebra video

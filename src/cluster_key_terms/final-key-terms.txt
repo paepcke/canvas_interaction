@@ -1,0 +1,253 @@
+all
+roll-up operation
+count function
+Armstrong's axioms
+duplicates
+Hadoop
+read uncommitted
+slicing and dicing
+recursive triggers
+star schema
+relation
+outer join
+association classes
+self join
+key constraints
+plural ID refs
+Cartesian product
+key value stores
+recursive constructs
+implicitly existentially quantified
+where condition
+relational algebra query language
+disambiguating attributes
+except
+isolation
+transaction rollback
+violation
+tuples
+general assertions
+streaming format
+online analytical processing
+atomicity
+referential integrity
+mutual recursion
+online transaction processing
+parsed XML
+data modeling
+serializability
+select statement
+aggregation
+intersection operator
+decision support systems
+let clause
+mega relations
+table variables
+query languages
+order by
+closure
+balance trees
+Data Manipulation Language
+materialized views
+attribute based constraint
+conceptual layer
+rename operator
+correlated reference
+composition
+primary key
+XML schema descriptor
+tuple based constraints
+natural join
+SQL
+repeatable read
+tagged element
+map function
+grouping
+XPath
+foreign key
+impedance mismatch
+durability
+syntactic correctness
+singular ID ref
+MySQL
+referencing variables
+modifying views through triggers
+fourth normal form
+referential integrity constraint
+Pig
+array
+XSL
+multi-attribute keys
+index
+data warehousing
+modifying views
+referential integrity constraints
+Postgres
+grant privileges on the view
+key declarations
+rewriting process
+rollup
+hierarchical structure
+theta join
+repeatable reads
+like predicate
+unified modeling language
+safety
+decomposition
+applied relation
+template
+referencing clause
+return clause
+theta
+NoSQL
+linear recursion
+template matching
+isoluation levels
+combining rule
+Data Definition Language
+phantom tuples
+anomoly
+order by clause
+nesting development
+objects
+ACID properties
+key
+designing schemas
+multi-value dependency
+negative subqueries
+third normal form
+self associations
+triggers
+temporary table
+recursively defined relation
+set operators
+distinct
+database management system
+non-null constraint
+attributes
+interjoin
+schema
+disk pages
+with cube
+translating designs
+where clause
+dirty reads
+splitting rule
+virtual views
+references
+navigation axis
+difference operator
+XML schema descriptions
+functional dependency
+grant option
+relational model
+with rollup
+typed values
+following sibling
+FLWOR expression
+JSON
+SAX
+unordered model
+nonlinear recursion
+select operator
+graph database system
+authorization
+ad hoc queries
+boyce codd normal form
+data manipulation language
+grant statement
+XSLT
+inner join
+set null
+validity
+reserved word
+WITH statement
+dicing
+serializable
+applied
+logical layer
+inserting data
+cascade option
+arrays
+multiplicity
+convenience
+revoke privileges
+having condition
+foreign key constraints
+relational data model
+OLAP queries
+tuple-based constraint
+project operator
+drill down
+slicing
+double slash construct
+property
+join back
+union operator
+multi-valued dependency
+sub queries
+not in
+referential integrity violations
+universal quantification
+hash tables
+MapReduce
+delete data
+entity relationship model
+extensible style sheet language
+reliability
+functional dependencies
+expression trees
+recursively defined union
+null
+check constraints
+SQLite
+implied ordering
+relational algebra
+database authorization
+updating existing data
+recursion
+intersection rule
+views
+read committed
+cube query
+XQuery
+physical design advisor
+turing completeness
+resource description framework
+constraints
+Driad
+distinct values
+integrity constraints
+isolation levels
+transactions
+for clause
+object
+transitive closure
+Hive
+JSON schema
+automatic view modifications
+nested invocation
+assignment statements
+recursive queries
+recursively applying templates
+document object model
+XML schema
+cycle
+Union operator
+global serializability
+negative dependence
+reduce function
+database
+tautology
+cascade
+JSON Query
+Driadlink
+Kleene
+consistency
+trivial functional dependency
+triggering event
+normal form
+updatable views
+privileges
+document type descriptors
+read only transaction

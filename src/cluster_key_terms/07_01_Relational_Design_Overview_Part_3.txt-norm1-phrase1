@@ -1,0 +1,24 @@
+ now let's similarly motivate the concept of multi value dependencies and fourth normal form
+ it is actually a little bit more complicated but it follows the same rough outline
+ now let's look at a different portion of the information about applying and let's suppose for now that we're just concerned about students what colleges they're applying to and what high schools they went to
+ we still have redundancy and update and deletion anomalies
+ for example a student who applies to stanford is going to have that fact captured once for every high school that they went to
+ a student who went to palo alto high school will have that fact captured once for every college they apply to
+ in addition we get a kind of multiplicative effect here
+ because let's say a student applies to c colleges and they went to h high schools i know students don't go to a lot of high schools but let's suppose that this is one that had moved a lot
+ in that case we're going to have c times h tuples
+ what we'd really like to have is something more on the order of c plus h because then we'd be capturing each piece of information just once
+ now the interesting thing is that the badness of this particular design is not addressed by boyce codd normal form in fact this relation is in boyce codd normal form because it has no functional dependencies
+ it's not the case that every instance of a social security number is associated with a single college name or a single high school
+ as we will see later if there are no functional dependencies then the relation is automatically in boyce codd normal form but it's not in and fourth normal form
+ so fourth normal form is associated with what are called multi value dependencies
+ when we specify a multi value dependency as we've done here with the double arrow what this is saying is that if we take a particular social security number in the relation we will have every combination of college names that are associated with that social security number with every high school that's associated with that social security number
+ we'll actually see that when we have this multi value dependency we automatically have this one too
+ i know it seems a bit complicated and we will formalize it completely but for now now just think about the english statement that multi valued dependency is saying that we are going to have every combination of those two attributes and values in those attributes for a given social security number
+ in other words those values are really independent of each other
+ so if we have that situation then what we should really do is store each college name and each high school for each social security number one time and that's what fourth normal form will do for us
+ fourth normal form similarly to boyce codd normal form says if we have a dependency then the left hand side must be a key
+ in this case it's a multi value dependency we're looking at so it's really saying something different but the basic idea is the same which is that we want only one tuple that has each value that's appears on the left hand side of a multi value dependency so let's see what would happen in this example if we use our multi value dependencies to decompose the relation based on the idea of fourth normal form
+ well it is the intuitive thing that happens
+ we separate the information about the college names that a student applies to from the information about the high schools themselves and then we'll see that that we only store each fact once and we do get the behavior of having c plus h tuples instead of having c times h tuples
+ like with functional dependencies and boyce codd normal form we'll be completely formalizing all of this reasoning and the definitions in later videos

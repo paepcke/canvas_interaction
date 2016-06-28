@@ -1,0 +1,212 @@
+ this video provides an overview of some nosql systems
+ i want to say right up front that it's being made in november
+ this is a field that's changing very fast so this is an overview of what's going on right now
+ as a reminder from the previous video nosql systems have arisen because it was recognized that not every problem involving large scale management or analysis of data was best solved by using a relational database system
+ some problems still are but there are others that are more suitable for a different type of system that we're going to talk about
+ nosql as a term has evolved to mean not only sql where sql doesn't really mean the sql language but it means a traditional database management system
+ again as a reminder from the previous video the nosql systems are different from traditional systems in that they tend to provide a flexible schema rather than a rigid structure
+ they tend to be quicker or cheaper or both to set up
+ they're geared towards really massive scalability and they tend to use relaxed consistency models in order to give higher performance and higher availability
+ the downside is being that there's no declarative query language so more programming is typically involved in manipulating the data and because of the relaxed consistency models the plus is a better performance the downside is fewer guarantees about the consistency of the data
+ so there are a number of incarnations of nosql systems and i've chosen as of november to divide into four categories the mapreduce_framework key value stores document stores and graph database systems
+ in terms of the first two one way you can think about it sort of roughly is that the mapreduce_framework is typically used for applications that would have used relational olap or online analytical processing
+ they tend to be analysis applications that touch large amounts of the data to do complex analyses
+ whereas key value stores tend to be more in the oltp world as a reminder that's online transaction processing and that tends to be a lot of small operations touching very small parts of the data
+ the other two document stores and graph database systems are self explanatory
+ they involve documents and graphs
+ now you might wonder why i didn't mention column stores because column stores are often discussed in terms of nosql
+ so column stores are in one sense just a way of organizing relational database systems for higher performance for certain types of applications but we'll also see that key values stores do tend to have sometimes not all of them have a model that's also based on columns being an important concept
+ so now i'll discuss each of these in turn although i'm going to spend the most amount of time on mapreduce
+ so we can think of mapreduce as a framework
+ it came originally from google
+ they invented the term mapreduce and now there's an open source system widely used called hadoop which does implement the mapreduce_framework so the first aspect of mapreduce is that there is no data model at all
+ the data in the mapreduce_framework is stored in files both as input and output
+ in the google mapreduce implementation it's the google file system gfs
+ in the hadoop open source implementation it's the hadoop distributed file system hdfs
+ what the user provides to process data using the mapreduce_framework is a set of specific functions
+ not surprisingly one of those functions is called map and one of them is called reduce
+ other functions that the user needs to provide is a reader function which will read data from files and provide it as records
+ a writer function that will take the output records and write them into files and finally there's an optional function called the combiner that we'll discuss
+ so the user just provides this set of functions and then what the system provides is the glue that processes the data through the functions
+ the system also provides fault tolerance of the processing so if there is a crash or a node goes down during the execution it will be guaranteed to be as if that didn't happen
+ and finally the system also provides scalability so that the mapreduce_framework can be used for very very large data analysis
+ so let's talk about the two most important functions the map function and the reduce function
+ the map function is used to take the data analysis problem and divide it into sub problems
+ very specifically the function that the user provides called map is going to take a data item as input and it's going to produce as output zero or more key value pairs
+ now what i mean by a sub problem here is that we're going to separately deal with the set of records associated with each key and that's the job of the reduce function
+ so the reduce function which we'll write takes as its parameters a key and then a list of values for that key and it produces as output zero or more records
+ now we'll shortly see a concrete example that will hopefully make this more understandable but before we do that let 's look at the overall architecture of how these functions are used to process data
+ so we'll start with our map function which let's put inside a box and then we will have input records going into the map function
+ as a reminder what the map function produces from each input record is an output record that's a key value pair and we're going to have these records sort of directed in a different way for each key
+ so let's say this is the way that the records are gonna go for key key and up to key n and of course the records will have values associated with them as well
+ so we'll send each batch of records for a given key into our reduce function so let me just draw a few reduce boxes here there's one for each set of records for a given key
+ and then as we mentioned before the reduce function produces output records
+ at the highest level that's it
+ that's our data processing
+ we start with a bunch of input
+ we divide it up into sub problems based on a key which will extract from the input record somehow we'll see an example and then each sub problem associated with a particular key is set through the reduce function which produces the output
+ and that's the end of our processing
+ now things are of course a bit more complex than that
+ first of all there's no reason to have one map box because the map function takes each input record and processes it separately so we can parallelize the mapping as much as we want
+ so let's change the picture here to have a whole set of map boxes
+ so now each mapbox is going to take its records and it's going to produce records with given keys so we'll still send k over to the first reducer
+ if we have k it'll go here and down here
+ and of course
+ this map will send things to reduce reduce reduce and so on
+ now you might wonder what happened to those reader and writer functions that i talked about
+ the reality is that we don't actually start with input records we start with our data in files
+ so here's the real original data
+ we'll draw this picture here for files and let's erase our input records here because the job of the reader is to take the files extract the records from the files and provide them to the map functions
+ so here is that side of thing it's a bit sloppy but i think get the idea
+ and we have a similar thing on the other end the output methods come out of the reducers but then their provided to the writer functions that which write the output to a final file
+ so here it is our original input in files here our final output in files there
+ ok but let me remind you what the user provide what the system provides
+ so the user creates a single map function that takes records and emits a key value pair for each record
+ the user provides a single reduce function that takes a set of values for a given key and produces zero or more outputs and i should mention that the map can produce zero or more outputs from each record as well
+ it doesn't have to be a one to one mapping
+ the user also provides the reader function to extract data from files and the writer function to write data to the output
+ and there's one more optional function i mentioned called the combiner
+ the combiner actually is sort of attached to the mapper so we can kind of put it here
+ and what the combiner does is it actually in sort of in the mapper will take a set of records for a given key so say for k and then we'll send a combined version of that record to the reducer
+ in a way you can think of it as a sort of pre reduce phase and we'll see examples of this that occurs with the mapper to make things more efficient and send less data to the reducer
+ so the user has provided these pieces these system infrastructure takes the pieces and distributes them to multiple machines because a lot of this can go on in parallel
+ all of this can go on in parallel this too and this too
+ here you have to exchange data maybe from one machine to another but once you do parallelism can occur and here as well
+ so the system distributes them to machines and you can add more machines to make it all all run faster
+ the system also provides fault tolerance so if something goes badly here it will redo that reducer function and here as well and finally as i mentioned before it provides scalability
+ but i should add i think one of the most important things the mass produce architecture provides is the glue that puts this all together
+ because again the user is only providing these functions and the system will take care of all of the execution moving the data around and calling the function over the large amounts of data that are being processed
+ well all of that is pretty abstract so let's look at a concrete example and let's go back to the domain that i introduced in the previous video of analyzing a web log where we have in each record a user id url the time of the access and maybe some additional information
+ and let's start out with a fairly simple task which is that we want to count the number of accesses for each domain where the domain is inside the url
+ so for example the domain might be the stanford edu domain where we have accesses to many different urls with that domain and we're just going to count how many accesses there have been to stanford
+ so to perform this task the user has to provide a map function and a reduce function
+ let's look at what they do
+ the map function is going to take a record
+ we'll assume that the reader has already extracted the record from the file and it provides it in this format with these four fields
+ and what the map function is going to do is simply look inside the record and extract the domain from the url and it's going to produce as output from that record the domain as the key so this is the key and then for this we can just have a null value as the value we're not going to actually need to use a value
+ and so that's the job of the mapper pretty simple
+ now what does the reduce function do
+ the reduce function is going to take a domain because that's the key and that's the first argument and then it's going to take a list of values in this case it's going to be a list of null values and what's interesting is that each one of these null values represents one access to that domain
+ so all the reduce function needs to do is count up how many nulls there are for each domain so it's going to produce as its result the domain and the count
+ and believe it or not we've solved their problem with just a little bit of code just a code to find the domain inside the url from our record and then this simple code to count up the number of nulls
+ the system will take care of shipping the records to the right nodes to perform the tasks in parallel and then re shipping them so all of the records for all of the outputs for a particular domain are in the same place and can be counted
+ now let me give an example of how that combiner function will be used
+ the combiner function as a reminder will operate at the same node as a mapper and do some sort of pre aggregation of the data
+ so for example we could use a combiner we'll put that right here after the mapper and the combined function is going to take the domain and the list of nulls actually it's going to do exactly what the reduce function was doing and it's going to produce the domain and account
+ and so that at each individual node we'll count up how many accesses there were to that domain in the data that's being processed at that node but then when we get to the reduce function we may get a bunch of those records so this list of null here now becomes a count that's what arrives at the reduce function the output of the combine and then instead of doing a count here we do a sum and that will give us the right answer as well and that will be more efficient again because of the pre aggregation that occurs right in the same node that's processing the map function
+ whoops i made one mistake there
+ sorry about that
+ actually this count here that goes to the reduce function is a list of counts right because we're going to get one of these from each of the mappers and then we add those list of counts
+ that's the sum that we perform here sorry about that small mistake
+ now let's modify the problem
+ we'll take the same data but instead of just counting how many accesses we have to each domain let's compute some total value of the accesses for each domain
+ and we might do that based on something that we see in the additional information for example how valuable the user is whether the user went off and bought something something like that
+ so let's modify our map and reduce functions for this slightly enhanced problem
+ now our map function again is going to take a record and this time it's not going to look only at the url but it's also going to look inside the additional information and what it will produce is the domain that it extracted from the url and then let's say some kind of score on how valuable that access was based on whatever it sees inside additional information
+ the reduced function then is going to take a domain and it's going to take a list of scores for that domain and then similar to what we had previously the output is going to be the domain and the sum of those scores
+ now one of the interesting things here is how the map function interacts with this additional information because the map function is going to have code that is going to look in the information and it's going to determine a score based on what it sees
+ if we change what's available in additional information then we can modify the map function but everything else can stay the same or if we say we refine how we extract the score
+ so that is one benefit to some extent of the the mapreduce_framework because the computation of the score is just embedded in this one piece of code
+ now let's modify our example further similar to the modification we made in the earlier video let's suppose that in addition to the web blog we have separate information about the user
+ so separately from what might be an additional info we have in a different data set the user id the name the age the gender and so forth
+ and now let's say that we again want to find the total value of the accesses for each domain but now the value is computed using the user attributes that we get from the separate data set
+ well this frankly in map reduce is hard to do
+ it effectively involves joining these two data sets not something that's supported natively in mapreduce
+ so now we've kind of hit the limit of what's very convenient to do in the map reduce framework but we will momentarily see that there are solutions to that as well
+ so to summarize the mapreduce_framework has no built in data model
+ the data just starts and files and it ends in files
+ the user just needs to provide specific functions the map function reduce function reader and writer and optionally a combiner
+ and the system will provide all of the execution glue it will guarantee the tolerance to system failures and it provides scalability by doing the assignment of the processing tasks to say an increasing number of computing nodes
+ so when the mapreduce_framework came out of google and the hadoop open source implementation was released there's a lot of excitement
+ it was pretty exciting because you could just write a couple of simple functions and then the system would provide the processing of massive amounts of data through those functions and it would be scalable it would be efficient and it would be fault tolerant
+ but over time people realized that they don't always want that low level programming and our favorite traditional notions of database schemas and declarative queries started to be missed
+ and so what was developed is some languages that actually sit on top of hadoop or the mapreduce_framework
+ one of them is called hive and hive offers schemas and a language that looks very much like sql
+ another language is called pig
+ pig is a little bit more imperative
+ in other words it's a bit more of a statement language but the fundamental constructs in pig are still relational operators and you could almost think of a pig script as being a little bit like those statements of relational algebra that we saw way back when with the addition of loops and so forth
+ both of these languages are what the user sees and they compile to a workflow or you think of that as a graph of hadoop jobs
+ hadoop again being the open source implementation of map and reduce any job being one instance of map and reduce like that big picture i showed before
+ and one thing i should mention as of november which it is now a really significant portion of hadoop jobs are actually generated by hive and pig or hive or pig
+ so more and more users are actually choosing to use a higher level language rather than program the mapreduce_framework directly
+ now i'd be remiss if i didn't also mention one other system
+ there's a system called driad that allows users to specify a workflow sort of similar to the workflow that might be generated by hive and pig so it's more general than just one mapreduce job
+ and there's also a language called driadlink that sits on top of driad and compiles to driad sort of in the same way that hive and pig compile to a workflow of mapreduce jobs
+ now let's move on to talk about key value stores
+ as a reminder the hadoop or mapreduce_framework is designed for more olap type operations or analytical operations that involve scanning most of the data and i think that was very clear from what the mapreduce_framework does
+ where key value stores are designed more for these oltp style applications where you're doing small operations maybe over a single record in a massive database
+ and so the key value stores are extremely simple
+ the data model for key value stores are just pairs of keys and values not surprisingly
+ and the basic operations are simply to insert a new record so you provide a key and value to fetch a record by it's key to update the contents the value in the record for a given key or to delete the record with the given key
+ so that's it and with that simple set of operations as you can imagine the implementation is focusing on doing these simple operations over massive databases very very quickly
+ so again like hadoop efficiency scalability and fault tolerance are the most important things because we're looking at applications with massive amounts of data and very stringent performance requirements
+ so the way the implementation works at a very very high level it's actually quite complicated to make it work very well is that the records are distributed to the nodes the computing nodes based on the key probably a hash value over the key
+ so to find the record for a given key can be very quick
+ you go straight to the node
+ in fact the records may be replicated across multiple nodes and that gives you both efficiency you can go to maybe a lightly loaded node it gives you fault tolerance if a node fails
+ the notion of the actions and key value stores are very simple
+ one operation itself is a transaction so we don't have the idea of grouping a bunch of operations into transactions
+ and furthermore they implement something called eventual consistency
+ and that says that the replicas of a single record can actually diverge in their value for some point of time
+ what eventual consistency specifies is that if all operations stop then the system will become consistent with all copies of each record being the same
+ now unfortunately as is sometimes the case these very simple operations and this simple data model weren't always quite enough and so some key value stores but not all i would say have a concept called columns that occur within the value
+ so the value here has a little bit more structure to it than just a blob of bits
+ and the columns will typically be kind of like an embedded key value stores
+ one thing that's important is they don't require uniform column
+ so none of the key value stores are as strict in their structure as a relational database system would be
+ the other addition that some allow is a fetch on a range of keys
+ so this might say i want to get all keys say between two and ten and so that requires a different type of implementation as you can imagine but it does allow that operation to be performed efficiently if that is something that the application needs
+ just a few examples of key value stores
+ this is not an exhaustive list there are many more and this is only november so things will change over time
+ but some of the more prominent key value stores are listed here google's big table amazon dynamo cassandra which is an open source voldemort h base and again there are many others
+ these are just a few example
+ now let's talk about document stores
+ actually document stores are very much like key value stores except the value itself is a document
+ so the data model is a key document pairs and what's interesting now is that the document in document stores is typically a known type of structure so the document might contain json formatted data javascript object notation
+ it might contain xml which we have learned about or other semi structured formats
+ the basic operations are very similar though to what we say in key value stores
+ you can insert a new document based on a key
+ we can fetch based on a key
+ modify the contents associated with key and delete the record associated with a specific key
+ but also very important is that there is a fetch operation based on the document contents and this is very system format specific what the operations would be
+ so there is not a standardized fetched query language at this point in time
+ again a few example systems a not exhaustive list are the systems couch db mongo db simple db
+ they all seem to have db in their name
+ and again this is november things that will undoubtedly change
+ one sql system i'd like to cover is graph database systems
+ graph database system as the name implies are designed for storing and running queries or other operations over very large graphs the data model is that every object is either a node or it's an edge between nodes
+ nodes may have properties very often id is a required property of a and edges may have labels so you can think of them as rolls
+ so i think what's best to understand this is just to see an example
+ my example is going to be a very small social network a tiny one actually
+ a similar one to what was used for some of our sql exercises
+ so let's start with three nodes and the nodes are gonna represent people and the properties of the nodes are going to be id name and grade
+ and so each node is going to have a value for the id name and grade
+ for this one we'll make it one amy in grade nine and we'll have two more
+ so here are the three nodes representing three people in our social graph
+ we also have id which is ben in grade nine and id which is carol in grade ten
+ depending on the system the nodes may or may not have to have uniform key value pairs within the most system won't be that stringent
+ then in addition to the nodes we have the edges between the nodes
+ typically they would be directed edges
+ so let's make two different types of edges
+ let's make friend edges and let's make likes edges
+ so let's say for example amy likes ben
+ so that would be a directed edge here with the property likes and maybe ben likes carol let's say here
+ and maybe then we have that amy and carol are both friends with each other so we'll have a different type of edge called friend
+ now one might wonder how long those friendships will last with this complicated likes relationship
+ but in any case this gives you an idea of the type of data that's stored in a graph database
+ the data model is very specifically about storing nodes with properties inside them like key value pairs and edges typically with labels or rolls on them of course that's not required
+ so in graph database systems currently the interfaces to the systems and the query languages vary a lot
+ there's no standardization at all and the queries might just be single step queries like asking for friends
+ they might be path expressions like ask for the women friends of the men friends of someone
+ we saw that example in the earlier video
+ or they might have full recursion where you can traverse to arbitrary depths through the graph
+ a few example systems again as of november you know i was going to say that are a neo j flat db and prego
+ and these systems actually differ quite a lot from each other
+ i also wanted to mention rdf
+ rdf is the resource description framework and there's something known as the rdf triple stores
+ rdf is based on objects having relationships to other objects
+ so you can almost think of those as two nodes with edges between them so you can imagine how rdf can be mapped to graph databases
+ so those were four examples of nosql systems
+ if the most prominent categories at this point in time the mapreduce_framework again with languages sitting on top of mapreduce such as hive and pig key value stores for more small transactions over massive databases but just operating small bits of them at once
+ document stores and graph database systems
+ nosql stands for not only sql recognizing that for some applications these frameworks work better than traditional database systems but for many applications a vast number of applications traditional databases are still used

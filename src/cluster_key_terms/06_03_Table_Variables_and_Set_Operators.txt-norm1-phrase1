@@ -1,0 +1,136 @@
+ in this demo we'll be learning some more features of the sql language
+ specifically we'll be learning about table variables and about set operators
+ we already learned the basic select statement
+ which can be quite powerful for writing queries but we'll learn some constructs in these demos that will give us even more expressive power
+ the first construct is table variables
+ table variables are in the from clause and they actually serve two uses
+ one is simply to make queries more readable as we'll see
+ but a second purpose is to rename relations that are used in the from clause particularly when we have two instances of the same relation
+ this is exactly what we needed in the relational algebra when we wrote joins that included two instances of the same relation
+ the second construct we'll be learning actually a set of constructs in this video are the set operators
+ and we'll be learning the same three set operators we had in relational algebra the union operator the intersect operator and the except operator which is the minus operator
+ we'll be doing a demo and the demo will use the same college admissions database that we've been using in previous demos where we have tables about college information student information and students applying to colleges
+ let's move to the demo
+ let's start with a big join query that we'll use to introduce table variables
+ this query involves all three relations
+ it joins the three relations on their shared attributes and then it selects a bunch of information
+ so here we see the result of that query
+ so the main point of this query is not the result but just to show you how table variables are used in the from clause
+ we can add two each of our relation names a variable
+ we'll use s for student and c for college and a for apply
+ and then everywhere else in the query instead of writing the full relation name we can just use the variable
+ in this case we're not changing the expressiveness we're not changing the outcome of the query we're really just making it a bit more readable and we can do the same thing here in this left clause
+ we'll take s and a and so on
+ then we'll run the query and we'll get exactly the same result no change
+ now let's look at where table variables are actually useful
+ what we want to get in this query is all pairs of students who have the same gpa
+ this is kind of similar to the relational algebra query we did where we found all pairs of colleges that are in the same state
+ in order to do that we need to have two instances of the student relation
+ so we'll call one instance s and we'll call the other instance s
+ and the from will do the cross product of those two so it will consider every every possible pair of students from the student relation
+ from all those pairs we'll take the pairs where the student had the same gpa and will return the id name and gpa for each of the two students
+ so let's go ahead and execute the query and here we can see the result
+ now this result is exactly what we wrote
+ it literally is every pair of students that have the same gpa but it might not be what we intended
+ amy and amy the same student
+ well amy has the same gpa as herself but more likely we just wanted different students who had the same gpa
+ so to do that we'll add an and that says these are two different students
+ the sids of the students are different
+ now let's run the query and see what happens
+ now we see that we no longer have amy and amy and every student is paired with a different student
+ we do have two amy's here but don't be alarmed this amy is and this amy is
+ so things are looking quite a bit better but there's still one thing that we might not want in the result of the query which is that we have amy paired with doris and then we have doris paired with amy
+ so we're actually getting every pair of students twice in the two different orders
+ as it turns out that's very easy to fix
+ we only need to erase one character to make that work
+ maybe you can think about what that character is
+ here it is
+ instead of looking at not equals we'll just make it less than
+ and then we'll get every pair of students only once because we'll always be listing the one with the smaller sid first and finally we get the answer that we probably intended in the first place
+ now let's take a look at the set operators and we'll start with union
+ just like in our relational algebra video let's use the union operator to generate a list that includes names of colleges together with names of students
+ so here's the query that will do it for us and we go ahead and execute the query and we see our result
+ now i left the schema as having the c name in the first part of the union and the s name in the second
+ sql allowed me to do that and it chose to use the c name to label the result
+ if i want to unify the schemas of the two sides of the union and give a new label for the result i use the as as we saw earlier for re naming attributes in the result of queries
+ so i'll add as name to both sides of the union run the query and now i see name in the result
+ now one thing you might have noticed is that this result is actually sorted
+ we didn't ask for it to be sorted but for some reason the system sorted it for us
+ and i can actually explain why that happened
+ i'll also mention that if i ran this same query on another system it might not come out sorted
+ in fact it will not come out sorted because i tried it
+ here's the deal
+ the union operator in sql by default eliminates duplicates in its results
+ so if we have two amy's which in fact we do we only get one amy in our result
+ and similarly for craig we have two of those as well
+ so that's the default and it so happens the system i'm using today which is called sqlite eliminates duplicates gets by sorting the result
+ so it sorts the result looks for adjacent pairs that are the same and eliminates all but one of those and then it gives us the answer
+ but again i want to emphasize that's not something one can count on when one runs the same query on a different system or even on the same system on a different day
+ now if we want to have the duplicates in our result that's something we can do quite easily
+ we add to union the word all that will turn the set operator into what's technically a multi set operator that retains duplicates
+ we run the query
+ well the first thing we notice is it's not sorted anymore
+ that's because it didn't need to eliminate the duplicates
+ but if we look closely we'll also see that the duplicates are now there
+ we have two amys for example and we have two craigs as well
+ if we want this result to be sorted and to guarantee that the other one's sorted we would add an order by clause
+ so we can just say order by name
+ we run the query and now we have the result in sorted order
+ our next query demonstrates the intersect operator
+ this query is going to get the ids of all students who have applied to both cs for a major and ee for a major
+ so very simple query
+ we get the ids of students who applied to cs the ids of students who applied to ee and then we perform the intersect operator on the result of those two queries
+ we execute it and we find that there are indeed two students who applied to cs and ee
+ some database systems don't support the intersect operator
+ they don't lose any expressive power
+ we just have to write our queries in different ways
+ so this next query is computing exactly the same thing
+ the sids of students who have applied to both cs and ee but this time we're doing it by doing two instances of the apply relation
+ one of these self joins so we have to use table variables again so we take every pair of apply tuples we look at cases where it's the same student and in one case they're applying for cs in the other case they're applying for ee and we'll return the sid of those students
+ so we run the query and we get sort of the same answer but not exactly because we have a whole bunch of duplicates now that we didn't get when we did it with an intersect operator
+ now where did those duplicates come from
+ let's take a look at the apply relation itself
+ here we see that student applied to that there are indeed two students who applied to cs and ee
+ some database systems don't support the intersect operator
+ they don't lose any expressive power
+ we just have to write our queries in different ways
+ so this next query is computing exactly the same thing the sids of students who have applied to both cs and ee but this time we're doing it by doing two instances of the apply relation one of these self joins so we have to use table variables again
+ so we take every pair of apply tuples we look at cases where it's the same student and in one case they're applying for cs
+ in the other case they're applying for ee and we'll return the sid of those students
+ so we run the query and we get sort of the same answer but not exactly because we have a whole bunch of duplicates now that we didn't get when we did it with an intersect operator
+ now where did those duplicates come from
+ let's take a look at the apply relation itself
+ here we see that student applied to cs and to ee and to cs again and to ee again
+ and we're gonna get all pairs of tuples where one pair pair of the tuples is cs and the other is ee
+ so we'll get cs with ee cs with ee and so on
+ going back to our query result
+ here it is
+ we can see that we got the four 's when we ran the query
+ well that's easy to get rid of
+ we just write select distinct and that will get rid of duplicates and now we're back to our original query result
+ now instead of finding students who applied to both cs and ee let's find students who applied to cs but did not apply to ee
+ for that we need the difference operator
+ it's called difference in relational algebra
+ sometimes it's called minus
+ the word that's used in the sql standard is the word except
+ so here's our query
+ we find the student ids who applied to cs and then we take away from those the ids of students who applied to ee
+ we run the query and we find that there are three students who applied to cs and not to ee
+ some database systems don't support the except operator either and here things get a little tricky
+ so let's try to rewrite that query without using the except operator
+ so as a reminder we want to find students who applied to cs but did not apply to ee
+ so here's my attempt at writing that query
+ i again do a self join of apply with apply and i find all pairs where it's the same student we're talking about and the major in one of the tuples of cs and the major in the other one is not ee
+ well it looks pretty good
+ let's see what happens
+ whoa we got a lot of results
+ okay well that's probably just that problem with duplicates again so let's just add distinct and go for it
+ it still seems like a lot of results
+ let's go back to our previous query that uses except and then we found that there were three students in the result where here we're still getting five in the result
+ well if we think about exactly what we wrote what we wrote is finding all pairs of apply records where it's the same student and they applied to cs in one of the pairs and they didn't apply to ee in the other
+ so it could be for example biology or geology
+ but the problem is that when we consider these pairs that doesn't mean there's not another pair with the same student where they applied to cs and ee
+ all this is actually finding is students who applied to cs and also applied to another major that's not ee
+ so that's quite different from the query we're shooting for
+ and actually the interesting thing is that with the constructs we've seen so far in sql it's not possible to write the query we had earlier without using the except operator
+ but in later videos we will see additional constructs in sql that do allow us to write that query

@@ -1,0 +1,71 @@
+ in this final video about transactions we'll focus on the concept of isolation levels
+ as a reminder transactions are a solution for both the concurrency control and system failure problem in databases
+ a transaction is a sequence of one or more operations that's treated as a unit
+ transactions appear to run in isolation and if the system fails each transaction changes are reflected either entirely or not at all
+ on this video we are going to focus on the isolation portion of transactions
+ as a reminder we can have multiple clients operating on the same database
+ and each client will submit a sequence of transactions
+ so we have this client with t t
+ here we have t t t and so forth
+ and each transaction itself is a sequence of statements
+ serializeability says that it's okay for the system to inter leave the execution of these statements with the statements that are being performed by other clients however the behavior against the database must be equivalent to the transactions themselves executing in some serial order
+ for example in this case the system may enforce behavior that's equivalent to say doing transaction t first
+ then maybe t t and then t and so on
+ serializability give us understandable behavior and consistency but it does have some overhead involved in the locking protocols that are used and it does reduce concurrency
+ as a result of the overhead and reduced concurrency systems do offer weaker isolation levels
+ in the sql standard there are three levels read uncommitted read committed and repeatable read
+ and these isolation levels have lower overhead and allow higher concurrency but of course at a cost which is lower consistency guarantees
+ i've listed the three alternative isolation levels from the weaker to the stronger and to complete the picture at the bottom we have a fourth one which is serializable which is what we've been talking about already
+ before we proceed to learn about the different isolation let me mention a couple of things first of all the isolation level is per a transaction
+ so each client could set different isolation levels for each of its transactions if it wishes
+ second of all isolation levels are in the eye of the beholder and let me show you what i mean by that
+ so each client submits transaction to the database and might set the isolation level for that transaction
+ that isolation level only affects that transaction itself
+ it does not affect the behavior of any other transactions that are running concurrently
+ so for example our client on the left might set its transaction to be a repeatable read while our client on the right will set it's transaction to read uncommitted and those properties will be guaranteed for each of those transactions and won't affect the other
+ by the way the isolation levels really are specific to reads
+ they specify what values might be seen in the transaction as we'll see when we get into the details
+ so let's start by defining a concept called dirty reads
+ a data item in the database is dirty if it's been written by a transaction that has not yet committed
+ so for example here are two transactions i'll call them t and t and by the way throughout the rest of this video i'm going to put transactions in boxes and you can assume implicitly that there is a commit at the end of each box
+ i'm not going to write it each time
+ so our first transaction is updating standford's enrollment adding to it and our second transaction is reading the average enrollment in the college table
+ we're using our usual database of students applying to colleges
+ so after this enrollment standford's enrollment has added to it but before the transaction commits at that point in time the value is what's known as dirty
+ if our second transaction here reads this value then it might be reading a value that never actually exists in the database
+ and why is that because before this transaction commits there could be a system failure and the transaction could be rolled back as we described before and all of it's changes undone
+ meanwhile however the second transaction may have read that value before it was undone
+ here's another example now we have three transactions t t t our first transaction is modifying the gpa of student's who's high school size is sufficiently large
+ our second transaction is finding the gpa of student number
+ and our third transaction is modifying the high school size of student
+ so if this gpa here in transaction t is read before the commit of transaction t then that would be a dirty value for the gpa
+ again because of this first transaction doesn't commit then that value will be rolled back
+ there's a second case where we might have dirty data read in this trio of transactions and that's the size high school here
+ because notice that here we're modifying a high school size so if this size of high school is read before the commit point of the third transaction that would also be a dirty data item
+ one clarification about dirty reads is that there is no such thing as a dirty read within the same transaction
+ in t for example after we've modified the size high school we might read the size high school later in the same transaction and that's not considered a dirty read
+ so a read is only dirty when it reads a uncommitted value that was modified by a different transaction
+ so here's our first isolation level and it's our weakest one
+ it's called read i'm committed and what is says is that a transaction that has this isolation level may perform dirty reads
+ it may read values that have been modified by a different transaction and not yet committed
+ so lets take a look at an example
+ it's our same example
+ we've dropped the third transaction so our first transaction is modifying gpas in the student table and our second transaction is reading average of those gpas
+ so if these transactions are serializable then it'll be the behavior's guaranteed to be equivalent to either t followed by t or t followed by t
+ so either the second transaction will see all the gpas before they were updated or it will see all the gpas after they were updated
+ as a reminder we don't know which order these will occur in
+ only that the behavior will be equivalent to one of those orders
+ now let's suppose we add to our second transaction a specification that it has isolation level read uncommitted
+ and by the way this very long sentence is how we specify the isolation level in the sql standard
+ now when we don't specify an isolation level as we haven't here the default is serializable
+ although in most of our examples it won't actually matter what the first transaction's isolation level is as we'll see
+ we're going to be focusing on the data that's read in the second transaction and typically written in the first transaction
+ okay so let's see what's going on here
+ again this is t and t and our first transaction is updating the gpas
+ and now we've said in our second that it's okay for this average to read dirty values in other words to see uncommitted gpa modifications
+ in that case as the average is computed it could be computed right in the middle of the set of modifications being performed by t
+ in that case we certainly don't have serializable behavior
+ we don't have t followed by t since t is reading some values that are in the middle of t and similarly we don't have t followed by t
+ it might be that for our particular application we just don't care that much about having exact consistency
+ it may be that we don't mind if our average is computed with some old values and some new values we might not even mind if we compute in our average an increased gpa that ends up being undone when a transaction rolls back
+ so if we're just looking for a rough approximate gpa we can use this isolation level and we'll have increased concurrency decreased overhead better performance overall with the understanding that it will have reduced consistency guarantees

@@ -1,0 +1,262 @@
+ this video gives a live demonstration of the recursive constructs in sql that we introduced in the previous video
+ as a reminder recursion has been introduced intosequal as part of the with statement where we can set_up relations that are defined by queries that themselves refer to the relation being defined and finally we have a query that can involve the recursively_defined relations as well as other relations or other tables in the database
+ the typical expression within a with statement for a recursively_defined relation would be to have a base query that doesn't depend on r and then a recursive query that does depend on r we gave three examples in the introductory video and those are the same examples that we'll be demonstrated shortly
+ the first one was to compute ancestors when we have only a parent relation and the family tree could be arbitrarily deep
+ our second example was a case where we have an arbitrarily deep company hierarchy and we want to compute the total salary cost of a project starting at that project's manager and summing the salary of the entire sub tree
+ and our third example was about airplane flights
+ where we want to find the cheapest_way to fly from point a to point b
+ and we're willing to change planes as many kinds as we might need to in order to bring down the cost
+ we saw that all of these examples involved basically a notion of transit of closure computed as a recursively_defined relation
+ the last portion of our demo after we see these three queries solved using recursion will introduce one more twist which is what happens when we introduce cycles
+ so in the airline example
+ we'll set_up a case where you can fly from one city to another one and back
+ which is of course true in reality and we'll see what happens when we try to answer our query in that setting
+ i've started by creating a table called parent of
+ with parent child relationships
+ so we have alice carol bob carol carol dave and so on
+ you might actually want to write this down on a piece of paper to see what the actual tree looks like but the query we want to run is to find all of mary's ancestors so we're going to of course have eve as a parent and dave as a parent
+ and then dave's parent is carol and carol's parent is bob and so on
+ we'll get most of the data in our database in our query
+ so here is the query our first example of our recursive query
+ let me say right off that even more than anything else we've done in these videos i am going to encourage you to download the script and take a close look_at the query and preferable actually run the queries and play with them on the postgres system
+ and we are using for this demo postgres as sqlite and mysql do not support forth the with recursive statement at this point in time
+ so anyway here's our query and it is the form that we described in the introduction it's a width statement with recursive that's going to set_up a recursive relation called ancestor so this is what we were calling r earlier
+ this is our ancestor with a schema ad for ancestor and descendant
+ our final query once ancestor is all set_up is very simple it just says take the 'a' attribute from ancestor where a descendant is mary so that will give us mary's defendant
+ of course what's interesting is what's right here inside these parans because this our recursive query
+ and it does take the form we described of having a base query that is the first line and then the recursive query with a union between them
+ so we're going to start by saying that whenever we have a parent child relationship that's also an ancestor relationship
+ so we're going to take from our parent of table
+ the parent and child and we have to rename them as a and d and that says that parent children are an ancestor
+ what else in an ancestor
+ well if we have a tuple an ancestor an ancestor and a descendant and that descendant is the parent of a another person then the a and the ancestor together with the child from the parent of is also an ancestor relationship
+ so this is a kind of doing the join
+ not just kind of it's actually joining our ancestor as its being created and extending that relationship by joining with another instance of parent
+ so you can kind of think of going down the ancestor tree adding relationships as we go down
+ again i really can't encourage you enough to download this query and play with it yourself to fully understand what's going on
+ let's go ahead and run it
+ it's going to be rather anticlimatic
+ when we run it we do discover that these five people are mary's ancestors and if you've drawn the little tree of the data you can verify that that's the correct answer
+ let's play around a little bit
+ let me try a few other people's ancestors
+ let's try frank
+ we don't see frank here because frank actually happens to be a child of mary's so we should get even more ancestors when we run this one especially mary should be included and in fact she is there she is and these are frank's ancestors
+ let's try george i think george was somewhere in the middle of the tree there
+ yes george has three ancestors and finally let's try bob
+ bob is at the root so we should get an empty result and we do because again bob has no ancestors in our database
+ now lets take a look_at our second example
+ that was the one where we had a hierarchy of management chain in a company and then we were interested in computing the total salary cost of a project so i've set_up our three tables
+ the first one is the employee table it just gives the ids of the employees and the salary of each employee
+ the second table is the manager relationship
+ so again you might want to draw the little tree here although it's pretty simple this time
+ is at the root of our little management structure as as a subordinate
+ has two subordinates and and is another one
+ so it's only a three level tree
+ of course if we knew it was only three levels we wouldn't need recursion at all
+ but we're going to write a query that will work for arbitrary numbers of levels
+ so that's our management structure
+ and finally our third table the project table says that employee is the manager of project x so what we want to do is find the manager of project y in the hierarchy and then take that manager's salary along with the salary's of all the manager's subordinates recursively down to the management structure and of course that's everybody in in our little database
+ again i can't encourage you to download the script and run it for yourself
+ so here's our query to find the total salary of project x and i'm actually going to give a couple of different ways of running this for you
+ the way we've done it the first time is to effectively expand the management structure into a relation called superior
+ so that's really pretty much doing the ancestor computation which by the way is a transitive closure
+ i should have mentioned that earlier for those of you familiar with transitive closures
+ it's basically that operation
+ so we're going to compute these superiors so that we'll have every manager and employee relationship with a manager is arbitrarily above the employee
+ and then once we have that superior relationship computed then we write a actually a fairly complicated query so this is the final query of our with statement
+ and this one says we've got this recursive relation superior
+ we're going to the salaries from the employee relation where the id is either the manager of the project x so that's the first half here or an employee that's managed by the manager of project x
+ okay
+ now this down here i just want to emphasize this is not recursive it just so happens to have that same structure of union but there is nothing recursive happening down here
+ so this is just a regular sql query
+ once we have the superior relation that's the transitive closure of the manager relation
+ so let's take a look_at superior
+ superior here this is recursive with the union says that if we have a manager and that's the mid and eid
+ then if somebody is managing someone else then they are their superior
+ notice by the way i didn't specify a schema here so the schema is implicitly going to be m i d e i d
+ so we're going to put manager relationships in
+ and then if we have a superior relationship so if we have an mid managing an eid in the s relationship then we can add one more level because we join with the managers saying that if s is a superior of y and why is the manager of z been x's superior of z
+ this parallels exactly what we did with the ancestor computation in the previous example
+ again it's going to be rather anti climactic to run the query but let's do it
+ and we find out that four hundred is the total salary cost of project x when we count the manager of project x together with all of the people underneath that manager in the hierarchical structure
+ so when we think of recursion we often think of transitive closure or expanding hierarchies as we've done with our examples so far
+ but if we step back for a second we can see that there is a quite a bit simpler way to express the query that finds the salary burden of project x
+ now not only is this actually nicer to look_at it's probably much more efficient depending on how smart the query processor is
+ in our previous example if the query processor executes the query in a straight forward way it would compute this superior relationship for the absolute entire company hierarchy before it figured out which of those people were involved in project x
+ now a really good query processor might actually figure out to fold in a project x but not necessarily
+ here's an example and here's a new formulation of the query
+ we're actually going to tie x specifically to our recursion
+ what we're going to compute in our recursive with statement here
+ so this is the temporary relation we're computing is a relation containing just a list of the ids of the employees who are involved in project x
+ once we have all the employees involved in project x the query down here is trivial
+ we just find those employees who are among the x employees and we sum up their salaries
+ so let's take a look_at the recursive definition here and again it's taking the usual form of a base query union and recursive query and here's what we do
+ well obviously the manager of project x is one of the ids involved in project x
+ so here we find in the project the project name text and we take the manager of that project and we put that person's id into xemps
+ that's the first id that's going to go in there
+ that's going to seed the recursion
+ that's again the base query
+ then we add in our recursive step any employee who is managed by anybody who's in the x employees
+ so we'll take our manager relationship our x employees relationship and if the employee's manager is an x then that employee is also involved in x
+ so we seed the recursion with the manager of project x and then we just recursively go down the tree adding all of the employees that are underneath one by one
+ we don't have to know the depth of the tree because the recursion will continue until nobody else is added
+ i guess i should have mentioned that earlier in my earlier examples
+ again the recursion sort of adds a data over and over again until there's nothing new to add and that's when it terminates
+ so let's go ahead and run the query
+ anti climatic again but we get the same answer as the salary cost of project x
+ now we use the same form of query to find the total salary cost of two projects y and z
+ and that will also demonstrate having two relations that are defined in the width recursive command
+ so i have added project y and z to our project table and they're both managed by employees who are already in the database so they're a little lower down the hierarchy
+ we should expect those projects have lower total cost
+ that's for project x whose manager was at the root of our hierarchy
+ so here's our query it's a big one we're going to define ym and zm exactly as we defined x amps in the previous example
+ so y amps is a table of a recursively_defined relation temporary that's gonna contain a list of ids of the people the employees that are involved in project y
+ so we are going to put the manager of project y as our base query and then we're going to add to it in the recursion all of the employees who are managed by someone who's in the yms
+ and zm's exactly the same
+ we start the manager of project z and then we add to it all of the people are managed transitively down the tree by someone who's in the zm's relation
+ and then our final query down here for the statement is a union of two queries
+ the first one gets the total salary for y and it labels it as y total
+ so it takes all the ids that are in the y table and from the employee table get their salaries and sums them up
+ and similarly the z total
+ so now we'll run this query it will be slightly less is anti climactic
+ we do have now two tuples in our result
+ we see that the total salary for y is in the total salaries for z is
+ and if you check cross check this result against the data you'll see that these are indeed the total salaries when we take the managers we specified for projects y and z
+ and finally our last and most fun example
+ the one to find how to fly from point a to point be when all we're concerned about is cost and we don't care how many times we have to change planes
+ so here's the little flights table i've set_up and i used a and b so we can literally fly from point a to point b
+ all of our intermediate destinations are actually real airport codes and i've put in some airlines although they're not actually going to be used in our query
+ and then i've put in the cost of the flights
+ you might want to draw yourself a little graph so you can see what's going on and we can fly from a to chicago for from chicago to b for another or we can go from a to phoenix and then phoenix to las_vegas
+ to las_vegas to oh oh i don't remember what this is
+ cmh detroit cincinnati somewhere in the midwest
+ and from there to point b or we can take a non stop from a to b on good old jet blue for
+ so clearly we're never going to be going through chicago for a total of with that jet blue flight
+ but i've set_up the data as you're probably not surprised so that this long route through phoenix and las_vegas and somewhere in the midwest is in fact gonna be our cheapest_way to go
+ so now let's take a look_at the recursive query that's going to find us our root from point a to point b or at least find us the cheapest_way to get from point a to point b
+ so the first query i'm going to show actually gives us all the different costs of getting from a to b just so we can see those enumerated for us and then we'll modify the query to give us the cheapest cost
+ so here's the recursive query and we're going to use a recursively_defined relation called root
+ and root says that we can get from an origin to a destination for a particular total cost
+ ok
+ so we again in our recursion have the base query and the recursive query
+ this is exactly what you'd imagine
+ we can certainly get from point x to point y for a total cost if we can take a direct flight from point x to point y for a given cost
+ so that's our base query we start out with all of the direct flights in our route relation
+ and then we start adding routes by doing the join of a route with a additional flight
+ so basically what this join here says if i can get from the origin in a route to the destination and then that destination is the origin of another flight then i can add that flight
+ i can start with my original origin final destinationand the cost of that is going to be the total that i already had
+ plus the cost of the new flight and that's my new total
+ so again this is another transitive closer like recursion
+ it's very similar to the ancestor recursion
+ very similar to expanding the company hierarchy
+ the only real difference here is that we're also accumulating these costs as we do the recursion
+ so once we've done this recursion then we have a complete specification of all the roots within our flights database all of the way's we can get from a to b and the total cost
+ now one thing i should say is this is not actually giving us the ways of getting from one place to another
+ if we wanted to accumulate the actual route that we take so the flights and the costs and the airlines and so on we have to kind of use a structured structure inside our data base to accumulate those
+ there are ways of doing that but i'm not going to demonstrate that here
+ i'm just going to demonstrate the is accused of recursion and computing the total cost
+ ok so let's go ahead and run this query so we've computed all of the routes and then we're just gonna start by finding the routes from a to b and what the total cost of those are
+ so we'll run the query and we'll find out that there are three ways of getting from a to b
+ the first one happens to be that direct jet blue flight for
+ the second was the flight through chicago for a total cost of
+ you can go back and look_at the data and verify these
+ and the third one was that complicated routing where we stopped several times but we save a lot of money well twenty dollars over the direct flight by going through those cities because the total sub cost is
+ i'll leave it up to you whether it's worth twenty dollars to stop several times versus the direct flight
+ so now since my actual specification of what i wanted to know was the cheapest_way to go then i just say min total instead of in my final query and i run that and my answer is that is the cheapest_way to get from a to b
+ now here is an alternative formulation of the same query that essentially parallels the alternative that we looked at with our project cross where we built in project x into our recursion that simplified the recursion in that case
+ in this case it's not simpler but it could potentially be more efficient
+ we're going to build in the fact that we're starting from origin a so instead of finding all roots from any point to any other point in our recursion and then finding the roots from a to b let's create a relation recursively that says starting from point a i can get to a particular destination for a particular total cost
+ so this is going to build up roots starting from a the base query is going to of course start by looking at direct flights where the origin is a and is going to put the destination and the cost into our relation called from a
+ so that starts with that first gives us direct start from a where we can get on the direct where we can get to and how much it will cost us and then our recursion is going to add flights to that one
+ again it really parallels what we did with the project x
+ our recursion is going to say ok we know we can get a from particular we can get to a particular place from point a for a certain cost and that's our destination
+ if we add more flight so the origin of that flight is the destination of where we can get then that will also be a destination that we can get to from point a and we'll just add the cost of the additional flight on
+ one more time a strong suggestion that you download and try these things for yourself
+ once we found all the places we can get from a then we'll use that to figure out the cheapest_way to get to point b
+ but let's just start by running the with statement where all we do is see the places we can get to from a and the total cost of getting there
+ so here we go
+ and we can get to chicago phoenix or we can get to b a couple of different ways three different ways actually as we already know
+ we can also get to las_vegas and this mysterious cmh i wish i remembered what it were
+ so now if we're interested in finding the cheapest_way to get from a to b then we'll add where the destination equals b on here and we'll add the minimum total cost and hopefully that will be our good old and indeed it is
+ by the way we can do the same basic idea but backwards
+ instead of finding all the places that we can get from city a how about if we find all the places from which we can get to city b
+ so here's the query that does that
+ to b is going to be our recursively define relation that's going to give us the origin the place from which we can get to b and the total cost of getting to b from that place
+ so again the structure is exactly parallel
+ we start out with our base query saying if we have a direct flight to b then we can get from the origin of that direct flight at the cost of the flight to b and we then recursively add flights on that you can think of if your going from left to right adding flights from the left
+ so if we know we can get from a place to b and then we can go from take a direct flight from somewhere else to that place and we can get from that somewhere else to be
+ anyway so we do that again by joining so we're going to take our origin from which we can get to b we're going to find flight that take us to that origin we're going to add the cost of that flight and that gives us a new way to get to b
+ and then let me start by just writing the query that all of the places from which we can get to b and the cost of getting there
+ we'll run the query
+ and we can see that we can get to b from point a in different ways and from our other cities in our database as well
+ similarly to what we did previously if we're particularly interested in getting from a to b whoops let's make that our origin then we add where origin equals a and if we want the minimum it would be our minimum total again paralleling exactly what we did before
+ we run it and good old comes out
+ now we're going to have some real fun because i added another flight to our database and this flight takes us from columbus i now know its columbus to phoenix and creates a loop in our flights
+ so that means that we can fly from a to b next to las_vegas to columbus back to phoenix and then to las_vegas and columbus again
+ so we're going to have arbitrarily actually unbounded actually infinite length routes that we can take now
+ now obviously those routes aren't going to ever be the cheapest_way because as we take those roots it's going to get more and more expensive none of them are negative costs paying us to take flights
+ but if we just do our naive recursion where we generate all of our roots before we take a look_at our final query then we're going to be generating an infinite number of roots
+ so here's our original enquiry the first one we wrote where we were just finding all of the costs of getting from a to b by computing all of the roots in the entire database and then looking at those from a to b
+ now with our additional flight that creates a loop we run this command and nothing happens
+ actually if we wait long enough we're going to get an error
+ well okay we waited for a while
+ appears that the user interface we're using isn't going to show us the error
+ but if you try running this in post risk command line interface i assure you if you wait long enough eventually it will tell you that the recursion effectively overflowed
+ so it is trying to compute this unbounded number of routes in the recursive part of the with statement and never even gets to the query that we want to execute
+ ok here's my first attempt at fixing the problem
+ we know that we're never going to want to take a arbitrarily long route
+ we're never going to want to go around a cycle lots of times as our cheapest_way to get from point a to point b so what i've done here and i'm not going to go into this in great detail but i have added a condition in the recursion that says i'm only going to add a new route a new route into my recursively_defined route table when the total cost of that route and that's defined as the cost plus total here when we added is less then all of the ways we can already get from that place to that origin to that destination
+ so in other words i'm only going to add cheaper routes than the ones that are already there
+ and by the way if there are no routes already from the origin to the destination then this will be satisfied and we will add that first route then after that only adding cheaper ones
+ so let's try running this query and see what happens
+ well we got an error
+ now this is not a runtime execution error
+ this is actually an error that says we're not allowed to refer to our recursively_defined relation in a sub query within our recursion
+ the sql standard actually might allow this particular use but i don't know that any implementation actually handles it
+ it can be fairly difficult to handle a case where you have the recursively_defined relation in a subquery as well as in the outer query here
+ so that's obviously not going to solve our problem
+ now there's actually a feature of basic sql that can help us here with our problem
+ there's something called limit
+ we actually didn't discuss this in the sql videos but that says just give us this number of results
+ so let's say that we're going to have our recursion here for the roots but down here we're going to say i only need up to results for how i get from point a to point b
+ and the posary system actually makes use of the limit command in the final query to restrict the recursion
+ it's a nice feature and it was added specifically for this problem of possibly infinite recursions where we actually don't want it to be infinite because we only need a finite number of answers
+ okay so let's go with that here and we'll see that ah great
+ everything worked well
+ we got our roots from a to b
+ and i do have roots i mean so they're getting very expensive
+ down here i'm going to go around and around the mid west while lots and lots of times but that did the limit the recursion it did stop unlike our query where we didn't have the limit and it just went on indefinitely
+ so that looks pretty good with one unfortunate problem which is if we still want the minimum we're going to again get a infinite execution
+ so the old result is still sitting here but now the system is chunking on because the limit here is applied to this min to the number of tupimit the recursion we're always going to get only one tuple in our result
+ so even if we said limit one here we'd still get the infinite behavior so we haven't quite solved our problem
+ okay so here's what we're going to do
+ aesthetically maybe it's not the absolutely best solution but i'm going to argue that it's a pretty reasonable one
+ we tried limiting our recursion to only add new routes that were cheaper than existing routes to and from the same place
+ we weren't allowed to do that syntactically the recursive with statement didn't allow the sub query with the recursively_defined relation in it
+ so we're going to do a different change here where we're not going to add new roots to our flight when the length of the root in other words the number of flights contributing to that root is greater than or equal to ten
+ so how do we do that
+ we're going to add to our recursively_defined relation route the origin destination and total cost of that
+ and then we are going to add the length
+ and so that's going to put in each root tupple how many flights were involved in the root
+ so let's see how we do that with our recursion
+ we still have the base case here and the recursively_defined union
+ in our base case we're going to be adding to our route the non stop flights so we'll have exactly what thought we had before and then we'll have the constant one to say that this non stop flight is just one flight
+ then when we do our recursion we're joining our route relation that we're building up by extending it with an additional flight exactly as before but there is two changes here
+ one of them is that we're going to compute our new length by adding one to the existing length of the root for our new root because we're adding one flight
+ and then we're only going to add tupples to the root relation when the length of the route that we're adding is less than ten
+ so now let's see what happens
+ i'm going to start again by looking at all of the costs of getting from point a to point b and then we'll take to look_at finding the least
+ so we'll go ahead and execute the query and we see that we have one two three four five ways of getting from a to b where the length of the number of flights involved is less than or equal to
+ we see our friends here
+ this was the nonstop flight
+ this was the one through boston
+ here's our favorite one and there's a few more so these are going to go through that cycle a couple of times
+ but once we get to the length of ten we're not going to add any more so we've got termination and if we want to change it to find the minimum cost flight then it's just the min total as before and we'll find good old
+ now what 's unaesthetic about this is that we're actually limiting the amount of recursion
+ so the whole point of writing recursive queries is when we don't know the minimum number of computations that we need to do to get our answer
+ so maybe it would so happen to turn out that more than ten flights were required to get the cheapest and if that was the case then we wouldn't get our right answer
+ of course we could change it to a hundred and we'd still get the one seventy five
+ and you know honestly we could change it to and you can't see it happening here but it is actually recomputing that even when i put in
+ i can even do a and still going to work for me
+ so if we presume that nobody wants to take more than a flights in order to get from point a to point b in the cheapest fashion then this would be a reasonable way to bound the recursion and get the answer that we want
+ even in the presence of cycles in our relation
