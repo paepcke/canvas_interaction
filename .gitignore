@@ -55,3 +55,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+src/visualization/output.json
+src/visualization/resume-v2.json
+src/visualization/resumes_by_id.json
+src/visualization/resumes_processed.json
